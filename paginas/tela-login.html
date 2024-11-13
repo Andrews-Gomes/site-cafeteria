@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-br" class="h-100">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../estilos/estilos.css">
+</head>
+<body class="d-flex align-items-center py-4 banners banners-2 h-100">
+    <main class="container">
+        <div class="row justify-content-center">
+            <!-- Login Form -->
+            <div id="loginForm" class="col-12 col-md-8 col-lg-6 form-container">
+                <form id="loginFormData">
+                    <p class="text-center"><i class="bi bi-bootstrap fs-1"></i></p>
+                    <h1 class="h3 mb-3 fw-normal text-center">Login</h1>
+                    <div class="form-floating mb-2">
+                        <input type="email" class="form-control" id="loginEmail" placeholder="seuemail@gmail.com" required>
+                        <label for="loginEmail">E-mail</label>
+                        <div class="invalid-feedback" id="loginEmailError"></div>
+                    </div>
+                    <div class="form-floating mb-2">
+                        <input type="password" class="form-control" id="loginPassword" placeholder="senha" required>
+                        <label for="loginPassword">Senha</label>
+                        <div class="invalid-feedback" id="loginPasswordError"></div>
+                    </div>
+                    <div class="form-check text-start my-3 d-flex justify-content-between">
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="flexCheckDefault">
+                            <label class="form-check-label" for="flexCheckDefault">Lembrar?</label>
+                        </div>
+                        <a href="#" class="text-reset" id="registerLink">Registrar-se</a>
+                    </div>
+                    <button type="submit" class="btn quero-detalhes-cor w-100 py-2">Entrar</button>
+                    <a href="index.html" class="btn quero-detalhes-cor w-100 py-2 my-2">Início</a>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="col-12 col-md-8 col-lg-6 form-container" style="display: none;">
+                <form id="registerFormData">
+                    <p class="text-center"><i class="bi bi-bootstrap fs-1"></i></p>
+                    <h1 class="h3 mb-3 fw-normal text-center">Registrar-se</h1>
+                    <div class="form-floating mb-2">
+                        <input type="text" class="form-control" id="registerName" placeholder="João da Silva" required>
+                        <label for="registerName">Nome Completo</label>
+                        <div class="invalid-feedback" id="registerNameError"></div>
+                    </div>
+                    <div class="form-floating mb-2">
+                        <input type="email" class="form-control" id="registerEmail" placeholder="seuemail@gmail.com" required>
+                        <label for="registerEmail">E-mail</label>
+                        <div class="invalid-feedback" id="registerEmailError"></div>
+                    </div>
+                    <div class="form-floating mb-2">
+                        <input type="text" class="form-control" id="registerAddress" placeholder="Avenida Passos Alegres" required>
+                        <label for="registerAddress">Endereço</label>
+                        <div class="invalid-feedback" id="registerAddressError"></div>
+                    </div>
+                    <div class="form-floating mb-2">
+                        <input type="password" class="form-control" id="registerPassword" placeholder="senha" required>
+                        <label for="registerPassword">Senha</label>
+                        <div class="invalid-feedback" id="registerPasswordError"></div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="confirmPassword" placeholder="senha" required>
+                        <label for="confirmPassword">Confirmar a senha</label>
+                        <div class="invalid-feedback" id="confirmPasswordError"></div>
+                    </div>
+                    <button type="submit" class="btn quero-detalhes-cor w-100 py-2">Registrar-se</button>
+                    <a href="#" class="btn quero-detalhes-cor w-100 py-2 my-2" id="loginLink">Voltar</a>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="/scripts/script-login.js"></script>
+</body>
+</html>

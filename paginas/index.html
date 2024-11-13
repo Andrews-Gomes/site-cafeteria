@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="./" type="image/x-icon">
+  <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+  <title>Serenatto</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../estilos/estilos.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;600&display=swap"
+    rel="stylesheet">
+</head>
+
+<body data-bs-theme="light">
+
+  <header>
+    <nav class="navbar-expand-lg navbar bg-body-tertiary fixed-top">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html"><img class="" src="assets/logo.png"
+            alt="Logo da cafeteria serenatto"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+          aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasNavbarLabel"><img src="assets/logo-mobile.png"
+                alt="Logo da cafeteria serenatto"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+              <li class="nav-item">
+                <a class="nav-link" href="index.html">Início</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="tela-login.html">Login</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#contato">Contato</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Carrinho</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="modo-noturno">
+                    <label class="form-check-label" for="modo-noturno">Modo Noturno</label>
+                  </div>
+                </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Banner do começo -->
+    <section class="banners banners-1 d-flex flex-column justify-content-center text-center">
+      <div class="banners-titulo bg-body-secondary py-5">
+        <h2 class="fw-bold">Sua pausa para desfrutar a vida. </h2>
+        <p>Boas vindas ao & Bistrô Serenatto! Um ambiente aconchegante e acolhedor para apreciar um bom café.</p>
+      </div>
+    </section>
+
+
+    <!-- SEÇÃO NOSSOS PRODUTOS -->
+    <section class="py-5" id="categorias">
+      <h2 class="fw-bold text-center pb-1">Navegue por categorias:</h2>
+
+      <div class="row mx-0">
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card border-0 mx-auto btn" data-bs-toggle="modal" data-bs-target="#modal-1" style="width: 18rem;">
+            <a href="pagina-cafes-tradicionais.html" class="text-decoration-none text-reset">
+              <img src="assets/produtos-cafe-tradicional.png" class="card-img-top" alt="Xícara de café preto">
+              <div class="card-body text-center">
+                <h3 class="card-text fw-bold">Cafés Tradicionais</h3>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card border-0 mx-auto btn " data-bs-toggle="modal" data-bs-target="#modal-2"
+            style="width: 18rem;">
+            <a href="paginas-cafes-especiais.html" class="text-decoration-none text-reset">
+              <img src="assets/produtos-cafe-especial.png" class="card-img-top" alt="Xícara de café especial">
+              <div class="card-body text-center">
+                <h3 class="card-text fw-bold">Cafés Especiais</h3>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card border-0 mx-auto btn" data-bs-toggle="modal" data-bs-target="#modal-3" style="width: 18rem;">
+            <a href="paginas-vitaminas.html" class="text-decoration-none text-reset">
+              <img src="assets/produtos-vitaminas.png" class="card-img-top" alt="Smoothies e Vitaminas">
+              <div class="card-body text-center">
+                <h3 class="card-text fw-bold">Smoothies e Vitaminas </h3>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card border-0 mx-auto btn" data-bs-toggle="modal" data-bs-target="#modal-4" style="width: 18rem;">
+            <a href="pagina-paes.html" class="text-decoration-none text-reset">
+              <img src="assets/produtos-paes.png" class="card-img-top" alt="Pães e Focaccias">
+              <div class="card-body text-center">
+                <h3 class="card-text fw-bold">Pães e Focaccias</h3>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card border-0 mx-auto btn" data-bs-toggle="modal" data-bs-target="#modal-5" style="width: 18rem;">
+            <a href="pagina-doces.html" class="text-decoration-none text-reset">
+              <img src="assets/produtos-doces.png" class="card-img-top" alt="Doces">
+              <div class="card-body text-center">
+                <h3 class="card-text fw-bold">Doces</h3>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card border-0 mx-auto btn" data-bs-toggle="modal" data-bs-target="#modal-6" style="width: 18rem;">
+            <a href="pagina-salgados.html" class="text-decoration-none text-reset">
+              <img src="assets/produtos-salgados - Copia.png" class="card-img-top" alt="Salgados">
+              <div class="card-body text-center">
+                <h3 class="card-text fw-bold">Salgados</h3>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ÚLTIMO BANNER -->
+    <section class="banners banners-3">
+    </section>
+
+
+    <!-- Formulario -->
+    <section class="py-4 container">
+      <div class="row">
+        <div class="col-10 col-xl-8 mx-auto">
+          <div class="border border-2 rounded p-3">
+            <h3 class="fw-bold p-3">Entre em contato!</h3>
+            <form id="contato">
+
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="floatingNome" placeholder="Nome">
+                <label for="floatingNome">Nome</label>
+              </div>
+
+              <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="floatingEmail" placeholder="name@example.com">
+                <label for="floatingEmail">Email</label>
+              </div>
+
+              <div class="form-floating mb-3">
+                <input type="number" class="form-control" id="floatingTelefone" placeholder="Telefone">
+                <label for="floatingTelefone">Telefone</label>
+              </div>
+
+              <select class="form-select mb-3" aria-label="Default select example">
+                <option selected>Preferência de contato:</option>
+                <option value="1">Whatsapp</option>
+                <option value="2">Email</option>
+                <option value="3">Ligação</option>
+              </select>
+
+              <label for="nivel-satisfacao" class="form-label">Nível de satisfação:</label>
+              <input type="range" class="form-range input-range" id="nivel-satisfacao">
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                <label class="form-check-label" for="flexCheckDefault">
+                  Deseja receber novidades por email?
+                </label>
+              </div>
+
+              <button type="button" class="btn quero-detalhes-cor fw-bold w-100 mt-3 py-3">Enviar</button>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Rodapé -->
+
+    <footer class="text-center quero-detalhes-cor">
+      <section class="container p-4 pb-0">
+
+        <a href="" class="btn"><i class="bi bi-whatsapp"></i></a>
+        <a href="" class="btn"><i class="bi bi-instagram"></i></a>
+        <a href="" class="btn"><i class="bi bi-twitter"></i></a>
+
+      </section>
+
+      <div class="p-3">
+
+        2023 <i class="bi bi-c-circle"></i> Desenvolvido por Alura | Projeto fictício sem fins comerciais.
+
+      </div>
+
+    </footer>
+
+
+
+  </main>
+
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N"
+    crossorigin="anonymous"></script>
+
+  <script src="../scripts/script.js"></script>
+
+</body>
+
+</html>
