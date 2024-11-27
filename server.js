@@ -16,26 +16,24 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuração do Pool PostgreSQL
+// Conexão com o banco de dados PostgreSQL
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT || 5432,
-  ssl: {
-    rejectUnauthorized: false // Isso permite a conexão SSL
-  }
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT || 5432,
+    ssl: {
+      rejectUnauthorized: false // Permitir conexão SSL
+    }
 });
 
-// Verificação da conexão
 pool.connect((err, client, release) => {
-  if (err) {
-    console.error('Erro ao conectar ao banco de dados:', err);
-    return;
-  }
-  console.log('Conectado ao banco de dados!');
-  release();
+    if (err) {
+        console.error('Erro ao conectar ao banco de dados:', err);
+        return;
+    }
+    console.log('Conectado ao banco de dados PostgreSQL!');
 });
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
@@ -44,244 +42,295 @@ app.use(express.static(path.join(__dirname, 'paginas')));
 
 // Rota para servir a página inicial
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'paginas', 'index.html'));
+    res.sendFile(path.join(__dirname, 'paginas', 'index.html'));
 });
 
 // Rota para verificar se o e-mail já está cadastrado
-app.post('/check-email', async (req, res) => {
-  const { email } = req.body;
-  try {
-    const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-    if (result.rows.length > 0) {
-      return res.json({ exists: true });
-    } else {
-      return res.json({ exists: false });
-    }
-  } catch (err) {
-    console.error('Erro ao verificar e-mail:', err);
-    return res.status(500).json({ message: 'Erro ao verificar e-mail.' });
-  }
+app.post('/check-email', (req, res) => {
+    const { email } = req.body;
+
+    pool.query('SELECT * FROM usuarios WHERE email = $1', [email], (err, result) => {
+        if (err) {
+            console.error('Erro ao verificar e-mail:', err);
+            return res.status(500).json({ message: 'Erro ao verificar e-mail.' });
+        }
+
+        if (result.rows.length > 0) {
+            return res.json({ exists: true });  // E-mail já existe
+        } else {
+            return res.json({ exists: false });  // E-mail não existe
+        }
+    });
 });
 
 // Rota para verificar se o telefone já está cadastrado
-app.post('/check-phone', async (req, res) => {
-  const { phone } = req.body;
-  try {
-    const result = await pool.query('SELECT * FROM usuarios WHERE telefone = $1', [phone]);
-    if (result.rows.length > 0) {
-      return res.json({ exists: true });
-    } else {
-      return res.json({ exists: false });
-    }
-  } catch (err) {
-    console.error('Erro ao verificar telefone:', err);
-    return res.status(500).json({ message: 'Erro ao verificar telefone.' });
-  }
+app.post('/check-phone', (req, res) => {
+    const { phone } = req.body;
+
+    pool.query('SELECT * FROM usuarios WHERE telefone = $1', [phone], (err, result) => {
+        if (err) {
+            console.error('Erro ao verificar telefone:', err);
+            return res.status(500).json({ message: 'Erro ao verificar telefone.' });
+        }
+
+        if (result.rows.length > 0) {
+            return res.json({ exists: true });
+        } else {
+            return res.json({ exists: false });
+        }
+    });
 });
 
 // Rota de registro
-app.post('/register', async (req, res) => {
-  const { name, email, address, password, confirmPassword, phone } = req.body;
+app.post('/register', (req, res) => {
+    const { name, email, address, password, confirmPassword, phone } = req.body;
 
-  if (password !== confirmPassword) {
-    return res.status(400).json({ message: 'As senhas não coincidem.' });
-  }
-  if (!name || name.length < 3) {
-    return res.status(400).json({ message: 'Nome completo deve ter mais de 3 caracteres.' });
-  }
-  if (!email || !/\S+@\S+\.\S+/.test(email)) {
-    return res.status(400).json({ message: 'E-mail inválido.' });
-  }
-  if (!address || address.length < 5 || !/\d/.test(address)) {
-    return res.status(400).json({ message: 'Endereço deve ter mais de 5 caracteres e conter um número.' });
-  }
-  if (!phone || !/^\(\d{2}\) \d{5}-\d{4}$/.test(phone)) {
-    return res.status(400).json({ message: 'Telefone inválido. Use o formato (XX) XXXXX-XXXX.' });
-  }
-
-  try {
-    const resultPhone = await pool.query('SELECT * FROM usuarios WHERE telefone = $1', [phone]);
-    if (resultPhone.rows.length > 0) {
-      return res.status(400).json({ message: 'Número já cadastrado.' });
+    if (password !== confirmPassword) {
+        return res.status(400).json({ message: 'As senhas não coincidem.' });
+    }
+    if (!name || name.length < 3) {
+        return res.status(400).json({ message: 'Nome completo deve ter mais de 3 caracteres.' });
+    }
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        return res.status(400).json({ message: 'E-mail inválido.' });
+    }
+    if (!address || address.length < 5 || !/\d/.test(address)) {
+        return res.status(400).json({ message: 'Endereço deve ter mais de 5 caracteres e conter um número.' });
+    }
+    if (!phone || !/^\(\d{2}\) \d{5}-\d{4}$/.test(phone)) {
+        return res.status(400).json({ message: 'Telefone inválido. Use o formato (XX) XXXXX-XXXX.' });
     }
 
-    const resultEmail = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-    if (resultEmail.rows.length > 0) {
-      return res.status(400).json({ message: 'E-mail já cadastrado.' });
-    }
+    pool.query('SELECT * FROM usuarios WHERE telefone = $1', [phone], (err, result) => {
+        if (err) {
+            console.error('Erro ao verificar telefone:', err);
+            return res.status(500).json({ message: 'Erro ao verificar telefone.' });
+        }
 
-    bcrypt.hash(password, 10, async (err, hashedPassword) => {
-      if (err) {
-        console.error('Erro ao criar hash da senha:', err);
-        return res.status(500).json({ message: 'Erro ao criar senha.' });
-      }
+        if (result.rows.length > 0) {
+            return res.status(400).json({ message: 'Número já cadastrado.' });
+        }
 
-      try {
-        await pool.query(
-          'INSERT INTO usuarios (nome_completo, email, endereco, senha, telefone) VALUES ($1, $2, $3, $4, $5)',
-          [name, email, address, hashedPassword, phone]
-        );
-        res.status(201).json({ success: true, message: 'Usuário registrado com sucesso.' });
-      } catch (err) {
-        console.error('Erro ao cadastrar usuário:', err);
-        return res.status(500).json({ message: 'Erro ao cadastrar usuário.' });
-      }
+        pool.query('SELECT * FROM usuarios WHERE email = $1', [email], (err, result) => {
+            if (err) {
+                console.error('Erro ao verificar e-mail:', err);
+                return res.status(500).json({ message: 'Erro ao verificar e-mail.' });
+            }
+
+            if (result.rows.length > 0) {
+                return res.status(400).json({ message: 'E-mail já cadastrado.' });
+            }
+
+            bcrypt.hash(password, 10, (err, hashedPassword) => {
+                if (err) {
+                    console.error('Erro ao criar hash da senha:', err);
+                    return res.status(500).json({ message: 'Erro ao criar senha.' });
+                }
+
+                pool.query(
+                    'INSERT INTO usuarios (nome_completo, email, endereco, senha, telefone) VALUES ($1, $2, $3, $4, $5)',
+                    [name, email, address, hashedPassword, phone],
+                    (err) => {
+                        if (err) {
+                            console.error('Erro ao cadastrar usuário:', err);
+                            return res.status(500).json({ message: 'Erro ao cadastrar usuário.' });
+                        }
+
+                        res.status(201).json({ success: true, message: 'Usuário registrado com sucesso.' });
+                    }
+                );
+            });
+        });
     });
-  } catch (err) {
-    console.error('Erro ao verificar e-mail ou telefone:', err);
-    return res.status(500).json({ message: 'Erro ao verificar e-mail ou telefone.' });
-  }
 });
 
 // Rota de login
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
 
-  try {
-    const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-    if (result.rows.length === 0) {
-      return res.status(400).json({ message: 'E-mail não encontrado.' });
-    }
+    pool.query('SELECT * FROM usuarios WHERE email = $1', [email], (err, result) => {
+        if (err) {
+            console.error('Erro ao verificar e-mail:', err);
+            return res.status(500).json({ message: 'Erro ao verificar e-mail.' });
+        }
 
-    const user = result.rows[0];
+        if (result.rows.length === 0) {
+            return res.status(400).json({ message: 'E-mail ou senha incorretos.' });
+        }
 
-    bcrypt.compare(password, user.senha, (err, isMatch) => {
-      if (err) {
-        console.error('Erro ao comparar senha:', err);
-        return res.status(500).json({ message: 'Erro ao comparar senha.' });
-      }
+        const user = result.rows[0];
 
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Senha incorreta.' });
-      }
+        bcrypt.compare(password, user.senha, (err, isMatch) => {
+            if (err) {
+                console.error('Erro ao comparar senha:', err);
+                return res.status(500).json({ message: 'Erro ao verificar senha.' });
+            }
 
-      try {
-        const token = jwt.sign({ id: user.id }, 'segredo', { expiresIn: '1h' });
-        res.cookie('auth_token', token, {
-          httpOnly: true,
-          secure: false,
-          sameSite: 'Strict',
-          maxAge: 3600000
+            if (!isMatch) {
+                return res.status(400).json({ message: 'E-mail ou senha incorretos.' });
+            }
+
+            // Gerar token JWT
+            const token = jwt.sign({ userId: user.id }, 'secrettoken', { expiresIn: '1h' });
+
+            res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+
+            return res.json({ success: true, message: 'Login bem-sucedido.' });
         });
-        res.json({ success: true, message: 'Login bem-sucedido.' });
-      } catch (err) {
-        console.error('Erro ao gerar token:', err);
-        res.status(500).json({ message: 'Erro ao gerar token.' });
-      }
     });
-  } catch (err) {
-    console.error('Erro ao fazer login:', err);
-    return res.status(500).json({ message: 'Erro ao fazer login.' });
-  }
 });
 
-// Rota para verificar autenticação
-app.get('/auth-check', (req, res) => {
-  const token = req.cookies.auth_token;
+// Middleware de autenticação
+function authenticateToken(req, res, next) {
+    const token = req.cookies.token;
 
-  if (!token) {
-    return res.json({ authenticated: false });
-  }
-
-  try {
-    const decoded = jwt.verify(token, 'segredo');
-    res.json({ authenticated: true, userId: decoded.id });
-  } catch {
-    res.json({ authenticated: false });
-  }
-});
-
-// Rota para logout
-app.get('/logout', (req, res) => {
-  res.clearCookie('auth_token', { httpOnly: true, secure: true, sameSite: 'Strict' });
-  res.json({ success: true, message: 'Logout realizado com sucesso.' });
-});
-
-// Rota para retornar os dados do usuário logado
-app.get('/user-data', async (req, res) => {
-  const token = req.cookies.auth_token;
-
-  if (!token) {
-    return res.status(401).json({ message: 'Usuário não autenticado.' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, 'segredo');
-    const userId = decoded.id;
-
-    const result = await pool.query('SELECT nome_completo, email, telefone, endereco FROM usuarios WHERE id = $1', [userId]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    if (!token) {
+        return res.status(401).json({ message: 'Token não encontrado. Por favor, faça login.' });
     }
 
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error('Erro ao buscar dados do usuário:', err);
-    return res.status(500).json({ message: 'Erro ao buscar dados do usuário.' });
-  }
+    jwt.verify(token, 'secrettoken', (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: 'Token inválido.' });
+        }
+
+        req.user = user;
+        next();
+    });
+}
+
+// Rota para obter dados do perfil
+app.get('/profile', authenticateToken, (req, res) => {
+    const userId = req.user.userId;
+
+    pool.query('SELECT * FROM usuarios WHERE id = $1', [userId], (err, result) => {
+        if (err) {
+            console.error('Erro ao buscar dados do usuário:', err);
+            return res.status(500).json({ message: 'Erro ao buscar dados do usuário.' });
+        }
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+
+        const user = result.rows[0];
+        res.json({
+            nome_completo: user.nome_completo,
+            email: user.email,
+            endereco: user.endereco,
+            telefone: user.telefone
+        });
+    });
 });
 
 // Rota para atualizar dados do perfil
 app.put('/user-data', authenticateToken, async (req, res) => {
-  const { nome_completo, email, endereco, telefone, senha_atual, nova_senha, confirmar_nova_senha } = req.body;
+    const { nome_completo, email, endereco, telefone, senha_atual, nova_senha, confirmar_nova_senha } = req.body;
 
-  const errors = {};
+    // Validações básicas
+    const errors = {};
 
-  if (!nome_completo || nome_completo.length <= 3) {
-    errors.nome_completo = "Nome completo deve ter mais de 3 caracteres";
-  }
-
-  if (!email || !/\S+@\S+\.\S+/.test(email)) {
-    errors.email = "E-mail inválido";
-  }
-
-  if (nova_senha && nova_senha !== confirmar_nova_senha) {
-    errors.senha = "As senhas não coincidem";
-  }
-
-  if (senha_atual) {
-    const result = await pool.query('SELECT senha FROM usuarios WHERE id = $1', [req.user.id]);
-    const validPassword = bcrypt.compareSync(senha_atual, result.rows[0].senha);
-    if (!validPassword) {
-      errors.senha_atual = "Senha atual incorreta";
+    // Verificar se os campos obrigatórios estão preenchidos corretamente
+    if (!nome_completo || nome_completo.length <= 3) {
+        errors.nome_completo = "Nome completo deve ter mais de 3 caracteres";
     }
-  }
 
-  if (Object.keys(errors).length > 0) {
-    return res.status(400).json(errors);
-  }
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        errors.email = "Email inválido";
+    }
 
-  // Atualizar perfil
-  try {
-    const updateQuery = 'UPDATE usuarios SET nome_completo = $1, email = $2, endereco = $3, telefone = $4' +
-    (nova_senha ? ', senha = $5' : '') +
-    ' WHERE id = $6';
+    if (!endereco || endereco.length <= 5 || !/\d/.test(endereco)) {
+        errors.endereco = "Endereço deve ter mais de 5 caracteres e conter um número";
+    }
 
-    const params = nova_senha ? [nome_completo, email, endereco, telefone, await bcrypt.hash(nova_senha, 10), req.user.id] :
-    [nome_completo, email, endereco, telefone, req.user.id];
+    if (!telefone || !/^\(\d{2}\) \d{5}-\d{4}$/.test(telefone)) {
+        errors.telefone = "Telefone inválido. Use o formato (XX) XXXXX-XXXX";
+    }
 
-    await pool.query(updateQuery, params);
+    if (!senha_atual) {
+        errors.senha_atual = "Senha atual é obrigatória";
+    }
 
-    res.json({ success: true, message: 'Perfil atualizado com sucesso.' });
-  } catch (err) {
-    console.error('Erro ao atualizar perfil:', err);
-    return res.status(500).json({ message: 'Erro ao atualizar perfil.' });
-  }
+    // Verificar se a nova senha e a confirmação são iguais e se são diferentes da senha atual
+    if (nova_senha || confirmar_nova_senha) {
+        if (nova_senha !== confirmar_nova_senha) {
+            errors.confirmar_nova_senha = "As senhas não correspondem";
+        }
+        if (nova_senha && nova_senha.length < 8) {
+            errors.nova_senha = "A nova senha deve ter pelo menos 8 caracteres";
+        }
+        if (nova_senha === senha_atual) {
+            errors.nova_senha = "A nova senha não pode ser igual à senha atual";
+        }
+    }
+
+    // Se houver erros, retornar os erros imediatamente
+    if (Object.keys(errors).length > 0) return res.status(400).json({ errors });
+
+    try {
+        // Consultar o usuário para verificar o telefone e a senha
+        const [userRows] = await pool.promise().query('SELECT telefone, senha, email FROM usuarios WHERE id = $1', [req.user.id]);
+        const user = userRows[0]; // Certifique-se de acessar o primeiro registro corretamente
+        if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+
+        // Verificar se a senha atual está correta
+        const isMatch = await bcrypt.compare(senha_atual, user.senha);
+        if (!isMatch) {
+            return res.status(400).json({ errors: { senha_atual: "Senha atual incorreta" } });
+        }
+
+        // Variáveis para salvar os valores atualizados
+        let telefoneAtualizado = telefone || user.telefone;
+        let emailAtualizado = email || user.email;
+        let senhaAtualizada = user.senha; // Inicializa com a senha atual do banco
+
+        // Verificar se o telefone foi alterado
+        if (telefone && telefone !== user.telefone) {
+            const [existingPhone] = await pool.promise().query('SELECT id FROM usuarios WHERE telefone = $1', [telefone]);
+            if (existingPhone.length > 0 && existingPhone[0].id !== req.user.id) {
+                return res.status(400).json({ errors: { telefone: "Telefone já cadastrado por outro usuário" } });
+            }
+            telefoneAtualizado = telefone;
+        }
+
+        // Verificar se o email foi alterado
+        if (email && email !== user.email) {
+            const [existingEmail] = await pool.promise().query('SELECT id FROM usuarios WHERE email = $1', [email]);
+            if (existingEmail.length > 0 && existingEmail[0].id !== req.user.id) {
+                return res.status(400).json({ errors: { email: "Email já cadastrado por outro usuário" } });
+            }
+            emailAtualizado = email;
+        }
+
+        // Se a nova senha foi fornecida, atualizar a senha
+        if (nova_senha) {
+            senhaAtualizada = await bcrypt.hash(nova_senha, 10);
+        }
+
+        // Atualizar os dados no banco de dados
+        await pool.promise().query(
+            'UPDATE usuarios SET nome_completo = $1, email = $1, endereco = $1, telefone = $1, senha = $1 WHERE id = $1',
+            [nome_completo, emailAtualizado, endereco, telefoneAtualizado, senhaAtualizada, req.user.id]
+        );
+
+        res.json({ message: "Perfil atualizado com sucesso" });
+    } catch (err) {
+        console.error('Erro ao atualizar perfil:', err);
+        res.status(500).json({ message: "Erro ao atualizar perfil" });
+    }
 });
 
-// Função para verificar o token
-function authenticateToken(req, res, next) {
-  const token = req.cookies.auth_token;
-  if (!token) return res.status(401).json({ message: "Token de autenticação não fornecido." });
+// Rota para excluir a conta
+app.delete('/delete-account', authenticateToken, (req, res) => {
+    const userId = req.user.id; // Obtém o ID do usuário a partir do token decodificado
 
-  jwt.verify(token, 'segredo', (err, user) => {
-    if (err) return res.status(403).json({ message: "Token inválido" });
-    req.user = user;
-    next();
-  });
-}
+    // Deleta o usuário do banco de dados
+    pool.query('DELETE FROM usuarios WHERE id = $1', [userId], (err, results) => {
+        if (err) {
+            console.error('Erro ao excluir usuário:', err);
+            return res.status(500).send('Erro ao excluir usuário');
+        }
 
-// Iniciar o servidor
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+        // Se o usuário foi deletado, envia sucesso
+        res.status(200).send('Conta excluída com sucesso');
+    });
 });
