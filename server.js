@@ -8,7 +8,10 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -21,15 +24,20 @@ const connection = mysql.createConnection({
     user: process.env.DB_USER,       // Usando a variável de ambiente para o usuário
     password: process.env.DB_PASSWORD, // Usando a variável de ambiente para a senha
     database: process.env.DB_NAME    // Usando a variável de ambiente para o nome do banco
-  });
-  
-  connection.connect((err) => {
-    if (err) {
-      console.error('Erro ao conectar no banco de dados: ' + err.stack);
-      return;
-    }
-    console.log('Conectado ao banco de dados com ID ' + connection.threadId);
-  });
+});
+
+// Teste de conexão
+app.get('/test-db', (req, res) => {
+    connection.query('SELECT 1 + 1 AS solution', (error, results) => {
+        if (error) {
+            console.error('Erro ao conectar ao banco de dados:', error);
+            res.status(500).send('Erro ao conectar ao banco de dados');
+        } else {
+            console.log('Banco de dados conectado! Resultado:', results[0].solution);
+            res.send('Conexão bem-sucedida! Resultado: ' + results[0].solution);
+        }
+    });
+});
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
@@ -383,7 +391,7 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
 
 // Iniciar o servidor
-app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
-});
+//app.listen(port, () => {
+  //  console.log(`Servidor rodando em http://localhost:${port}`);
+//});
 
