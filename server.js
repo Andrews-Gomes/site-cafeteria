@@ -346,6 +346,7 @@ app.put('/user-data', authenticateToken, async (req, res) => {
 });
 
 
+
 // Rota para excluir a conta
 app.delete('/delete-account', authenticateToken, (req, res) => {
     const userId = req.user.id; // Obtém o ID do usuário a partir do token decodificado
