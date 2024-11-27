@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const { Client } = require('pg'); // Importando o pacote PostgreSQL
+const { Pool } = require('pg');
 const router = express.Router();
 
 const app = express();
@@ -17,12 +17,17 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // Configuração do banco de dados PostgreSQL usando variáveis de ambiente
-const client = new Client({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+
+
+const pool = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT || 5432,
+  ssl: {
+    rejectUnauthorized: false // Isso permite a conexão SSL
+  }
 });
 
 // Conectar ao banco de dados
