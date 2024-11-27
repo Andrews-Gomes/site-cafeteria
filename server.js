@@ -30,14 +30,14 @@ const pool = new Pool({
   }
 });
 
-// Conectar ao banco de dados
-client.connect(err => {
+pool.connect((err, client, release) => {
     if (err) {
-        console.error('Erro ao conectar ao banco de dados:', err);
-        return;
+      console.error('Erro ao conectar ao banco de dados:', err);
+      return;
     }
-    console.log('Conexão com o banco de dados PostgreSQL bem-sucedida!');
-});
+    console.log('Conectado ao banco de dados!');
+    // Realize suas operações com o banco de dados aqui
+  });
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
