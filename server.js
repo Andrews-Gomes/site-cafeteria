@@ -16,7 +16,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-const mysql = require('mysql');
 
 // Configuração do banco de dados MySQL com a URL externa do Railway
 const connection = mysql.createConnection({
