@@ -8,10 +8,11 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3306; // Use a porta definida pelo Railway
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
+
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -26,18 +27,14 @@ const connection = mysql.createConnection({
     database: process.env.DB_NAME    // Usando a variável de ambiente para o nome do banco
 });
 
-// Teste de conexão
-app.get('/test-db', (req, res) => {
-    connection.query('SELECT 1 + 1 AS solution', (error, results) => {
-        if (error) {
-            console.error('Erro ao conectar ao banco de dados:', error);
-            res.status(500).send('Erro ao conectar ao banco de dados');
-        } else {
-            console.log('Banco de dados conectado! Resultado:', results[0].solution);
-            res.send('Conexão bem-sucedida! Resultado: ' + results[0].solution);
-        }
-    });
-});
+connection.connect((err) => {
+    if (err) {
+      console.error('Erro ao conectar ao banco de dados:', err);
+    } else {
+      console.log('Conexão com o banco de dados bem-sucedida!');
+    }
+  });
+  
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
