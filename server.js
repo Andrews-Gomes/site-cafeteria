@@ -285,7 +285,7 @@ app.put('/user-data', authenticateToken, async (req, res) => {
 
         // Verificar se o telefone foi alterado
         if (telefone && telefone !== user.telefone) {
-            const [existingPhone] = await connection.promise().query('SELECT id FROM usuarios WHERE telefone = ?', [telefone]);
+            const [existingPhone] = await pool.promise().query('SELECT id FROM usuarios WHERE telefone = ?', [telefone]);
             if (existingPhone.length > 0 && existingPhone[0].id !== req.user.id) {
                 return res.status(400).json({ errors: { telefone: "Telefone já cadastrado por outro usuário" } });
             }
@@ -294,7 +294,7 @@ app.put('/user-data', authenticateToken, async (req, res) => {
 
         // Verificar se o email foi alterado
         if (email && email !== user.email) {
-            const [existingEmail] = await connection.promise().query('SELECT id FROM usuarios WHERE email = ?', [email]);
+            const [existingEmail] = await pool.promise().query('SELECT id FROM usuarios WHERE email = ?', [email]);
             if (existingEmail.length > 0 && existingEmail[0].id !== req.user.id) {
                 return res.status(400).json({ errors: { email: "Email já cadastrado por outro usuário" } });
             }
@@ -307,7 +307,7 @@ app.put('/user-data', authenticateToken, async (req, res) => {
         }
 
         // Atualizar os dados no banco de dados
-        await connection.promise().query(
+        await pool.promise().query(
             'UPDATE usuarios SET nome_completo = ?, email = ?, endereco = ?, telefone = ?, senha = ? WHERE id = ?',
             [nome_completo, emailAtualizado, endereco, telefoneAtualizado, senhaAtualizada, req.user.id]
         );
@@ -324,7 +324,7 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
     const userId = req.user.id; // Obtém o ID do usuário a partir do token decodificado
 
     // Deleta o usuário do banco de dados
-    connection.query('DELETE FROM usuarios WHERE id = ?', [userId], (err, results) => {
+    pool.query('DELETE FROM usuarios WHERE id = ?', [userId], (err, results) => {
         if (err) {
             console.error('Erro ao excluir usuário:', err);
             return res.status(500).send('Erro ao excluir usuário');
