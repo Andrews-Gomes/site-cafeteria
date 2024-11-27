@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-const PORT = process.env.PORT || 3306; // Use a porta definida pelo Railway
+const PORT = process.env.PORT || 24233; // Use a porta definida pelo Railway
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
@@ -21,19 +21,22 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 const connection = mysql.createConnection({
-    host: process.env.DB_HOST,       // Usando a variável de ambiente para o host
-    user: process.env.DB_USER,       // Usando a variável de ambiente para o usuário
-    password: process.env.DB_PASSWORD, // Usando a variável de ambiente para a senha
-    database: process.env.DB_NAME    // Usando a variável de ambiente para o nome do banco
+  host: process.env.DB_HOST, // 'junction.proxy.rlwy.net'
+  user: process.env.DB_USER, // 'root'
+  password: process.env.DB_PASSWORD, // 'gVsEowQYrqEHRGhNaGjHMEBkdGfQbkXA'
+  database: process.env.DB_NAME, // 'railway'
+  port: process.env.DB_PORT, // '24233'
+  connectTimeout: 10000, // Timeout de 10 segundos
 });
 
 connection.connect((err) => {
-    if (err) {
-      console.error('Erro ao conectar ao banco de dados:', err);
-    } else {
-      console.log('Conexão com o banco de dados bem-sucedida!');
-    }
-  });
+  if (err) {
+    console.error('Erro ao conectar ao banco de dados:', err);
+  } else {
+    console.log('Conexão bem-sucedida com o banco de dados!');
+  }
+});
+
   
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
