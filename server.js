@@ -386,6 +386,6 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
 // Iniciar o servidor
 app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
+    console.log(`Servidor rodando em site-cafeteria-production.up.railway.app`);
 });
 
