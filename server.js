@@ -20,13 +20,15 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
+
+
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST, // 'junction.proxy.rlwy.net'
-  user: process.env.DB_USER, // 'root'
-  password: process.env.DB_PASSWORD, // 'gVsEowQYrqEHRGhNaGjHMEBkdGfQbkXA'
-  database: process.env.DB_NAME, // 'railway'
-  port: process.env.DB_PORT, // '24233'
-  connectTimeout: 30000, // Timeout de 10 segundos
+  host: 'junction.proxy.rlwy.net', // Host do banco de dados
+  user: 'root', // Usuário do banco de dados
+  password: 'gVsEowQYrqEHRGhNaGjHMEBkdGfQbkXA', // Senha do banco
+  database: 'railway', // Nome do banco de dados
+  port: 24233, // Porta do banco
+  connectTimeout: 30000, // Aumentando o tempo de conexão para 30 segundos
 });
 
 connection.connect((err) => {
@@ -36,6 +38,7 @@ connection.connect((err) => {
     console.log('Conexão bem-sucedida com o banco de dados!');
   }
 });
+
 
   
 
