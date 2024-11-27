@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-
+const port = 49286;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,25 +16,22 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuração da conexão usando as credenciais do Railway
-const pool = mysql.createPool({
+// Configuração do banco de dados MySQL
+const connection = mysql.createConnection({
     host: 'autorack.proxy.rlwy.net',
     user: 'root',
     password: 'jxBrxkWLSlQzdZkjMZqYEXqCxZKCZjmd',
-    database: 'railway',
-    port: 49286,
-    connectionLimit: 10,  // Ajuste o número de conexões conforme necessário
-    timeout: 30000
+    database: 'railway'
 });
-  
-  // Conectar ao banco de dados
- pool.connect((err) => {
+
+// Conectar ao banco de dados
+connection.connect(err => {
     if (err) {
-      console.error('Erro ao conectar ao banco de dados:', err);
-    } else {
-      console.log('Conectado ao banco de dados');
+        console.error('Erro ao conectar ao banco de dados:', err);
+        return;
     }
-  });
+    console.log('Conexão com o banco de dados MySQL bem-sucedida!');
+});
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
@@ -386,4 +383,9 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
 
 
+
+// Iniciar o servidor
+app.listen(port, () => {
+    console.log(`Servidor rodando em http://localhost:${port}`);
+});
 
