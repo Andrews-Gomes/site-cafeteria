@@ -222,6 +222,16 @@ app.get('/profile', authenticateToken, (req, res) => {
     });
 });
 
+console.log({
+    nome_completo,
+    emailAtualizado,
+    endereco,
+    telefoneAtualizado,
+    senhaAtualizada,
+    userId: req.user.id
+});
+
+
 // Rota para atualizar dados do perfil
 app.put('/user-data', authenticateToken, async (req, res) => {
     const { nome_completo, email, endereco, telefone, senha_atual, nova_senha, confirmar_nova_senha } = req.body;
