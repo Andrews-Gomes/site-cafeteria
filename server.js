@@ -16,13 +16,15 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuração do banco de dados MySQL
+const mysql = require('mysql');
+
+// Configuração do banco de dados MySQL com a URL externa do Railway
 const connection = mysql.createConnection({
-    host: 'mysql.railway.internal',
+    host: 'autorack.proxy.rlwy.net',
     user: 'root',
     password: 'jxBrxkWLSlQzdZkjMZqYEXqCxZKCZjmd',
     database: 'railway',
-    port: 3306
+    port: 49286
 });
 
 // Conectar ao banco de dados
