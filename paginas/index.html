@@ -5,9 +5,10 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Bem-vindo à nossa cafeteria online! Experimente sabores incríveis de cafés tradicionais, especiais, doces e muito mais.">
   <link rel="shortcut icon" href="./" type="image/x-icon">
   <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
-  <title>Serenatto</title>
+  <title>Cafeteria Gourmet</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css">
@@ -18,6 +19,11 @@
 </head>
 
 <body data-bs-theme="light">
+    <!-- Alerta Bootstrap -->
+    <div id="alertMessage" class="alert alert-danger fade show" role="alert"
+        style="display: none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1050; min-width: 300px; text-align: center;">
+        <span id="alertText"></span>
+    </div>
 
   <header>
     <nav class="navbar-expand-lg navbar bg-body-tertiary fixed-top">
@@ -39,14 +45,22 @@
               <li class="nav-item">
                 <a class="nav-link" href="index.html">Início</a>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" id="linkLogin">
                 <a class="nav-link active" aria-current="page" href="tela-login.html">Login</a>
+              </li>
+
+              <li class="nav-item" id="profileLink" style="display: none;">
+                <a class="nav-link" href="editar_perfil.html">Perfil</a>
+              </li>
+
+              <li class="nav-item" id="logoutLink" style="display: none;">
+                <a class="nav-link" href="#">Logout</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="#contato">Contato</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Carrinho</a>
+                <a class="nav-link" href="#" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">Carrinho</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="#">
@@ -65,13 +79,14 @@
     <!-- Banner do começo -->
     <section class="banners banners-1 d-flex flex-column justify-content-center text-center">
       <div class="banners-titulo bg-body-secondary py-5">
-        <h2 class="fw-bold">Sua pausa para desfrutar a vida. </h2>
-        <p>Boas vindas ao & Bistrô Serenatto! Um ambiente aconchegante e acolhedor para apreciar um bom café.</p>
+        <h2 class="fw-bold">Transforme seu dia com o sabor do nosso café. </h2>
+        <p>Bem-vindo à nossa cafeteria online! Um espaço acolhedor, onde o aroma do café encontra o conforto do seu lar.
+        </p>
       </div>
     </section>
 
 
-    <!-- SEÇÃO NOSSOS PRODUTOS -->
+    <!-- SEÇÃO NOSSOS CATEGORIAS -->
     <section class="py-5" id="categorias">
       <h2 class="fw-bold text-center pb-1">Navegue por categorias:</h2>
 
@@ -214,7 +229,7 @@
 
       <div class="p-3">
 
-        2023 <i class="bi bi-c-circle"></i> Desenvolvido por Alura | Projeto fictício sem fins comerciais.
+        2024 <i class="bi bi-c-circle"></i> Desenvolvido pelo aluno Andrews Gomes Ramos
 
       </div>
 
@@ -224,14 +239,31 @@
 
   </main>
 
-
-
+  <!-- offcanvas carrinho -->
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">Itens do Carrinho</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <ul id="cart-items" class="list-unstyled"></ul>
+      <div class="mt-3">
+        <p id="cart-total" class="fw-bold">Total: R$ 0,00</p>
+        <button id="clear-cart-btn" class="btn btn-secondary mt-3">Limpar Carrinho</button>
+        <button id="checkout-btn" class="btn quero-detalhes-cor mt-3">Ir para o pagamento</button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N"
     crossorigin="anonymous"></script>
 
   <script src="../scripts/script.js"></script>
+
+  <script src="../scripts/navbar.js"></script>
+
+  <script src="../scripts/script_carrinho.js"></script>
 
 </body>
 

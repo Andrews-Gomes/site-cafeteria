@@ -1,450 +1,222 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar perfil · WorkLink</title>
-    <link rel="shortcut icon" href="static/Wl.ico"type="image/x-icon">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script>
-              function showAlert() {
-      alert("Conta excluida com sucesso!");
-    }
-    </script>
-<style>
-    body{
-    margin-top:20px;
-    background:#EAEAEA
-    }
-    #botao{
-    color: #fff;
-    background-color: #ABDB2A;
-    border-color: #ABDB2A;
-    border: 1px solid transparent;
-    padding: 0.375rem 0.75rem; 
-    border-radius: 5px;
-}
-#delete{
-    color: #fff;
-    background-color: #b22306;
-    border-color: #b22306;
-    border: 1px solid transparent;
-    padding: 0.375rem 0.75rem; 
-    border-radius: 5px;
-    margin-top: 20px;
-}
-
-#delete:hover {
-    background-color: #ff2a00;
-   
-  }
-  
-  #delete:active {
-    background-color: #c13215;
-    box-shadow: none;
-  }
-
-#botaoSair{
-    color: #fff;
-    background-color: #0f0a30;
-    border-color: #0f0a30;
-    border: 1px solid transparent;
-    padding: 0.375rem 0.75rem; 
-    border-radius: 5px;
-}
-#botao:hover {
-    background-color: #8eb521;
-   
-  }
-  
-  #botao:active {
-    background-color: #7DAE1A;
-    box-shadow: none;
-  }
-
-  #botaoSair:hover {
-    background-color: #1c1357;
-   
-  }
-  #botaoSair:active {
-    background-color: #211956;
-    box-shadow: none;
-  }
-
-  .bg-gray-900 {
-      background-color: #1a202c;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página de Perfil</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="shortcut icon" href="assets/favicon.png" type="image/x-icon">
+  <!-- Link dos ícones -->
+  <link rel="stylesheet" href="estilos/estilos.css">
+  <style>
+    #successAlert {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1050;
+      width: auto;
+      max-width: 90%;
+      text-align: center;
+      display: none;
+      /* Ocultado inicialmente */
     }
 
-    .bg-white {
-      background-color: #fff;
+    .profile-card {
+      width: 100%;
+      max-width: 600px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
-    .border-t-4 {
-      border-top-width: 4px;
+    .profile-card .card-body {
+      padding: 3rem;
     }
 
-    .border-red-600 {
-      border-color: #dc2626;
+    .btn-danger {
+      background-color: #f44336;
+      border-color: #f44336;
     }
 
-    .text-center {
+    .btn-danger:hover {
+      background-color: #d32f2f;
+      border-color: #d32f2f;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+
+    .form-label {
+      font-weight: bold;
+    }
+
+    .form-control {
+      border-radius: 10px;
+    }
+
+
+    .profile-header {
       text-align: center;
     }
 
-    .text-gray-700 {
-      color: #4b5563;
+    .profile-header h3 {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #333;
     }
 
-    .text-white {
-      color: #fff;
+    .profile-header p {
+      font-size: 1.2rem;
+      color: #777;
+      margin-top: 10px;
     }
 
-    .inline-flex {
-      display: inline-flex;
+    .back-button {
+      font-size: 1.1rem;
     }
 
-    .mt-20 {
-      margin-top: 20px;
+    .btn-edit {
+      width: 100%;
+      margin-bottom: 1.5rem;
+      /* Espaço entre o botão de editar e os outros botões */
     }
 
-    .p-4 {
-      padding: 16px;
+    /* Ajustes de responsividade */
+    @media (max-width: 768px) {
+      .profile-header h3 {
+        font-size: 1.5rem;
+        /* Ajusta o tamanho do título em telas menores */
+      }
+
+      .profile-header p {
+        font-size: 1rem;
+        /* Ajusta o tamanho da descrição em telas menores */
+      }
+
+      .d-flex.justify-content-between {
+        flex-direction: column;
+        /* Coloca os botões em coluna em telas pequenas */
+        gap: 10px;
+        /* Adiciona espaçamento entre os botões */
+      }
+
+      .d-flex.justify-content-between .btn {
+        width: 100%;
+        /* Faz com que os botões se estiquem na largura disponível */
+      }
     }
 
-    .rounded {
-      border-radius: 0.25rem;
-    }
+    @media (max-width: 576px) {
+      .profile-header h3 {
+        font-size: 1.2rem;
+        /* Reduz ainda mais o tamanho do título em telas muito pequenas */
+      }
 
-    .max-w-sm {
-      max-width: 24rem;
-    }
+      .profile-header p {
+        font-size: 0.9rem;
+        /* Reduz o tamanho da descrição em telas muito pequenas */
+      }
 
-    .pt-0 {
-      padding-top: 0;
-    }
+      .profile-card {
+        padding: 1.5rem;
+      }
 
-    .bg-red-600 {
-      background-color: #dc2626;
-    }
+      .d-flex.justify-content-between {
+        flex-direction: column;
+        /* Coloca os botões em coluna em telas pequenas */
+        gap: 10px;
+      }
 
-    .text-2xl {
-      font-size: 1.5rem;
+      .d-flex.justify-content-between .btn {
+        width: 100%;
+        /* Faz os botões ficarem com 100% da largura */
+      }
     }
-
-    .mb-2 {
-      margin-bottom: 0.5rem;
-    }
-
-    .font-bold {
-      font-weight: 700;
-    }
-
-    .text-black {
-      color: #000;
-    }
-
-    .list-disc {
-      list-style-type: disc;
-    }
-
-    .inline-block {
-      display: inline-block;
-    }
-
-    .text-left {
-      text-align: left;
-    }
-
-    .pt-2 {
-      padding-top: 0.5rem;
-    }
-
-    .ml-2 {
-      margin-left: 0.5rem;
-    }
-
-    .flex {
-      display: flex;
-    }
-
-    .pt-8 {
-      padding-top: 2rem;
-    }
-
-    .w-1{
-      width: 50%;
-    }
-
-    .mr-1 {
-      margin-right: 0.25rem;
-    }
-
-    .bg-white {
-      background-color: #fff;
-    }
-
-    .border {
-      border-width: 1px;
-    }
-
-    .text-gray-600 {
-      color: #4b5563;
-    }
-
-    .border-gray-400 {
-      border-color: #cbd5e0;
-    }
-
-    .hover:bg-gray-300:hover {
-      background-color: #d1d5db;
-    }
-
-    .py-2 {
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
-    }
-
-    .px-4 {
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-
-    .rounded-full {
-      border-radius: 9999px;
-    }
-
-    .ml-1 {
-      margin-left: 0.25rem;
-    }
-
-    .bg-red-600 {
-      background-color: #dc2626;
-    }
-
-    .border-red-600 {
-      border-color: #dc2626;
-    }
-
-    .text-white {
-      color: #fff;
-    }
-
-    .border-gray-500 {
-      border-color: #6b7280;
-    }
-
-    .hover:bg-red-700:hover {
-      background-color: #c53030;
-    }
-
-    .hover:border-red-700:hover {
-      border-color: #c53030;
-    }
-
-    .font-medium {
-      font-weight: 500;
-    }
-</style>
+  </style>
 </head>
-<body>
-<div class="container">
-<div class="row flex-lg-nowrap">
-  <div class="col-12 col-lg-auto mb-3" style="width: 200px;">
 
+<body class="banners banners-2 h-100">
+  <div id="successAlert" class="alert alert-success" role="alert" style="display: none;">
+    Dados Alterados Com Sucesso!
   </div>
 
-  <div class="col">
-    <div class="row">
-      <div class="col mb-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="e-profile">
-              <div class="row">
-                <div class="col-12 col-sm-auto mb-3">
-                  <div class="mx-auto" style="width: 140px;">
-                    <div class="d-flex justify-content-center align-items-center rounded" style="height: 140px; background-color: rgb(233, 236, 239);">
-                      <span style="color: rgb(166, 168, 170); font: bold 8pt Arial;">140x140</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col d-flex flex-column flex-sm-row justify-content-between mb-3">
-                  <div class="text-center text-sm-left mb-2 mb-sm-0">
-                    <h4 class="pt-sm-2 pb-1 mb-0 text-nowrap">{{ nome }}</h4>
-                    <div class="mt-2">
-                      <button id="botao" type="button">
-                        <i class="fa fa-fw fa-camera"></i>
-                        <span>Escolher arquivo</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="text-center text-sm-right">
-                    <span class="badge badge-secondary">Desenvolvedor</span>
-                    <div class="text-muted"><small>Entrou em junho de 2023</small></div>
-                  </div>
-                </div>
-              </div>
-              <ul class="nav nav-tabs">
-                <li class="nav-item"><a href="" class="active nav-link">Configurações</a></li>
-              </ul>
-              <div class="tab-content pt-3">
-                <div class="tab-pane active">
-                  <form class="form" novalidate="" action="/edita_perfil" method="POST">
-                    <div class="row">
-                      <div class="col">
-                        <div class="row">
-                          <div class="col">
-                            <div class="form-group">
-                              <label>Nome</label>
-                              <input class="form-control" type="text" name="name" placeholder="Nome" value="{{ nome }}">
-                            </div>
-                            <label>Gênero</label>
-                            <select name="genero" class="dropdown">
-                                <option selected disabled class="form_select_option" value="">Selecione</option>
-                                <option value="Feminino" class="form_select_option">Feminino</option>
-                                <option value="Masculino" class="form_select_option">Masculino</option>
-                                <option value="Não-Binário" class="form_select_option">Não-Binário</option>                    
-                                <option value="Outro" class="form_select_option">Outro</option>                    
-                            </select>
-                            <div class="form-group">
-                                <label>Conta Bancária</label>
-                                <input class="form-control" type="text" name="contabancaria" value="{{ contabancaria }}" placeholder="Conta bancária">
-                              </div>
-                          </div>
-                          <div class="col">
-                            <div class="form-group">
-                              <label>Sobrenome</label>
-                              <input class="form-control" type="text" name="sobrenome" placeholder="Sobrenome" value="{{ sobrenome }}">
-                            </div>
-                            <div class="form-group">
-                                <div class="form-group">
-                                    <label>Telefone</label>
-                                    <input class="form-control" type="text" name="telefone" placeholder="Telefone" value="{{ telefone }}" >
-                                  </div>
-                                  <div class="form-group">
-                                    <label>Hashtags</label>
-                                    <input class="form-control" type="text" name="Hashtags" placeholder="{{ hashtags }}" value= "{{ hashtags }}">
-                                  </div>
-                              </div>
-                          </div>
-                        </div>
-                        
-                        <div class="row">
-                          <div class="col mb-3">
-                            <div class="form-group">
-                              <label>Descrição</label>
-                              <textarea name="descricao" class="form-control" rows="5" placeholder="" value="">{{ descricao }}</textarea>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-12 col-sm-6 mb-3">
-                        <div class="mb-2"><b>Alterar senha</b></div>
-                        <div class="row">
-                          <div class="col">
-                            <div class="form-group">
-                              <label>Senha atual</label>
-                              <input class="form-control" type="password" placeholder="••••••••••••">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="col">
-                            <div class="form-group">
-                              <label>Nova senha</label>
-                              <input class="form-control" name="password" type="password" placeholder="••••••••••••">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="col">
-                            <div class="form-group">
-                              <label>Confirmar <span class="d-none d-xl-inline">Senha</span></label>
-                              <input class="form-control" type="password" placeholder="••••••••••••"></div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col d-flex justify-content-end">
-                        <button action="/edita_perfil" method="post" id="botao" type="submit">Salvar alterações</button>
-                      </div>
-                    </div>
-                    
-                  </form>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  <div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card p-4 profile-card">
+      <div class="profile-header mb-4 text-center">
+        <h3 class="mt-2" id="userName">Olá, Nome</h3>
+        <p>Aqui você pode alterar seus dados!</p>
       </div>
-
-      <div class="col-12 col-md-3 mb-3">
-        <div class="card mb-3">
-          <div class="card-body">
-            <div class="px-xl-3">
-              <button id="botaoSair" onclick="window.location.href='/'">
-                <i class="fa fa-sign-out"></i>
-                <span>Sair</span>
-              </button>
-            </div>
-            <div>
-                <button id="delete" onclick="openDeleteAccountPopup()">Excluir conta</button>
-              </div>    
-          </div>
+      <form id="perfil-form" novalidate>
+        <div class="form-group">
+          <label for="nome_completo">Nome Completo</label>
+          <input type="text" id="nome_completo" name="nome_completo" class="form-control" disabled>
+          <small class="text-danger d-none" id="error-nome_completo"></small>
         </div>
-        <div class="card">
-          <div class="card-body">
-            <h6 class="card-title font-weight-bold">Suporte</h6>
-            <p class="card-text">Dúvidas? Entre em contato com nosso suporte!</p>
-            <button type="button" id="botao">Contate-nos</button>
-          </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" class="form-control" disabled>
+          <small class="text-danger d-none" id="error-email"></small>
         </div>
-      </div>
+        <div class="form-group">
+          <label for="endereco">Endereço</label>
+          <input type="text" id="endereco" name="endereco" class="form-control" disabled>
+          <small class="text-danger d-none" id="error-endereco"></small>
+        </div>
+        <div class="form-group">
+          <label for="telefone">Telefone</label>
+          <input type="text" id="telefone" name="telefone" class="form-control" disabled>
+          <small class="text-danger d-none" id="error-telefone"></small>
+        </div>
+        <div class="form-group">
+          <label for="senha_atual">Senha Atual</label>
+          <input type="password" id="senha_atual" name="senha_atual" class="form-control" disabled>
+          <small class="text-danger d-none" id="error-senha_atual"></small>
+        </div>
+        <div class="form-group">
+          <label for="nova_senha">Nova Senha</label>
+          <input type="password" id="nova_senha" name="nova_senha" class="form-control" disabled>
+          <small class="text-danger d-none" id="error-nova_senha"></small>
+        </div>
+        <div class="form-group">
+          <label for="confirmar_nova_senha">Confirmar Nova Senha</label>
+          <input type="password" id="confirmar_nova_senha" name="confirmar_nova_senha" class="form-control" disabled>
+          <small class="text-danger d-none" id="error-confirmar_nova_senha"></small>
+        </div>
+        <!-- Botão Editar Dados -->
+        <button type="button" class="btn btn-info btn-edit w-100 mb-3 mt-3" id="editDataBtn">
+          <i class="bi bi-pencil"></i> Editar Dados
+        </button>
+        <!-- Botão Cancelar -->
+        <button type="button" class="btn btn-danger w-100 mb-3 mt-3" id="cancelEditBtn" style="display:none;">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+        <!-- Botões de Ação -->
+        <div class="d-flex justify-content-between">
+          <button type="button" class="btn btn-secondary" onclick="window.location.href='/index.html'">
+            <i class="bi bi-house-door"></i> Voltar à Página Inicial
+          </button>
+          <button type="button" class="btn btn-danger" id="deleteAccountBtn">
+            <i class="bi bi-trash"></i> Excluir Conta
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Salvar Alterações
+          </button>
+        </div>
+      </form>
     </div>
-
   </div>
-</div>
-</div>
 
-<script>
-    function openDeleteAccountPopup() {
-      var popup = document.createElement('div');
-      popup.innerHTML = `
-      <div class="mt-20 p-4 rounded bg-white max-w-sm text-center border-t-4 border-red-600 mx-auto text-gray-700 pt-0">
-        <span class="bg-red-600 text-white p-4 rounded-full inline-flex -mt-8 mb-2">
-          <svg class="fill-current w-8 h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M6 2l2-2h4l2 2h4v2H2V2h4zM3 6h14l-1 14H4L3 6zm5 2v10h1V8H8zm3 0v10h1V8h-1z"/></svg>
-        </span>
-        <h3 class="font-bold text-2xl text-black mb-2">Excluir conta?</h3>
-        <p>Você perderá permanentemente:</p>
-        <ul class="list-disc inline-block text-left pt-2 ml-2">
-          <li>Perfil</li>
-          <li>Publicações</li>
-          <li>Fotos</li>
-        </ul>
-        <div class="flex pt-8">
-          <button class="w-1/2 mr-1 bg-white border text-gray-600 border-gray-400 hover:bg-gray-300 py-2 px-4 rounded font-medium">Cancelar</button>
-          <a href="/delete_conta" method="POST"><button onclick= "showAlert()" class="w-1/2 ml-1 bg-red-600 border border-red-600 text-white border-gray-500 hover:bg-red-700 hover:border-red-700 py-2 px-4 rounded font-medium" href="/">Excluir Conta</button>
-        </div>
-      </div>
-      `;
-
-      popup.style.position = 'fixed';
-      popup.style.top = '50%';
-      popup.style.left = '50%';
-      popup.style.transform = 'translate(-50%, -50%)';
-      popup.style.zIndex = '9999';
-      popup.style.backgroundColor = '#1a202c';
-
-      document.body.appendChild(popup);
-    }
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../scripts/perfil.js"></script>
 </body>
+
 </html>

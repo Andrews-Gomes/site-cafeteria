@@ -61,41 +61,60 @@ document.addEventListener('DOMContentLoaded', function () {
         const password = document.getElementById('loginPassword').value;
 
         if (validateLoginForm(email, password)) {
-            fetch('/login', {  // Corrigido para a URL correta no servidor
+            fetch('/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ email, password })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    window.location.href = '/';
-                } else {
-                    // Exibir mensagem de erro quando o login falhar
-                    if (data.message === 'E-mail não encontrado.') {
-                        setError('loginEmail', 'E-mail inválido');
-                    } else if (data.message === 'Senha incorreta.') {
-                        setError('loginPassword', 'Senha incorreta');
+                .then(response => {
+                    if (response.ok) {
+                        // Redirecionar para a página inicial após login bem-sucedido
+                        window.location.href = '/';
                     } else {
-                        alert(data.message || 'Erro inesperado');
+                        return response.json().then(data => {
+                            if (data.message === 'E-mail não encontrado.') {
+                                setError('loginEmail', 'E-mail inválido');
+                            } else if (data.message === 'Senha incorreta.') {
+                                setError('loginPassword', 'Senha incorreta');
+                            } else {
+                                setError('loginEmail', data.message || 'Erro inesperado');
+                            }
+                        });
                     }
-                }
-            })
-            .catch(error => {
-                alert('Erro ao fazer login: ' + error.message);
-            });
+                })
+                .catch(error => {
+                    setError('loginEmail', 'Erro ao fazer login: ' + error.message);
+                });
         }
     });
 
-    // Função de validação de registro
-    function validateRegisterForm(name, email, address, password, confirmPassword) {
+    // Função para aplicar a máscara de telefone
+    function applyPhoneMask(event) {
+        let phone = event.target.value;
+        phone = phone.replace(/\D/g, ''); // Remove qualquer caractere que não seja número
+        if (phone.length <= 2) {
+            phone = `(${phone}`;
+        } else if (phone.length <= 7) {
+            phone = `(${phone.slice(0, 2)}) ${phone.slice(2)}`;
+        } else {
+            phone = `(${phone.slice(0, 2)}) ${phone.slice(2, 7)}-${phone.slice(7, 11)}`;
+        }
+        event.target.value = phone;
+    }
+
+    // Adicionando a máscara de telefone no campo
+    const phoneField = document.getElementById('registerPhone');
+    phoneField.addEventListener('input', applyPhoneMask);
+
+    // Função de validação de registro (assíncrona)
+    async function validateRegisterForm(name, email, address, phone, password, confirmPassword) {
         let valid = true;
         clearError('registerName');
         clearError('registerEmail');
         clearError('registerAddress');
+        clearError('registerPhone');
         clearError('registerPassword');
         clearError('confirmPassword');
 
@@ -107,10 +126,47 @@ document.addEventListener('DOMContentLoaded', function () {
             setError('registerEmail', 'E-mail inválido');
             valid = false;
         }
-        if (address.length <= 5) {
-            setError('registerAddress', 'Endereço deve ter mais de 5 caracteres');
+
+        // Validação do endereço (deve conter pelo menos um número)
+        if (address.length <= 5 || !/\d/.test(address)) {
+            setError('registerAddress', 'Endereço deve ter mais de 5 caracteres e conter um número');
             valid = false;
         }
+
+        // Validação do telefone
+        if (!/^\(\d{2}\) \d{5}-\d{4}$/.test(phone)) {
+            setError('registerPhone', 'Formato inválido. Use: (99) 99999-9999');
+            valid = false;
+        }
+
+        // Verificar se o número de telefone já está cadastrado
+        const phoneCheckResponse = await fetch('/check-phone', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phone }),
+        });
+        const phoneData = await phoneCheckResponse.json();
+        if (phoneData.exists) {
+            setError('registerPhone', 'Número já cadastrado');
+            valid = false;
+        }
+
+        // Verificar se o e-mail já está cadastrado
+        const emailCheckResponse = await fetch('/check-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+        });
+        const emailData = await emailCheckResponse.json();
+        if (emailData.exists) {
+            setError('registerEmail', 'E-mail já cadastrado');
+            valid = false;
+        }
+
         if (password.length < 8) {
             setError('registerPassword', 'A senha deve ter mais de 8 caracteres');
             valid = false;
@@ -124,41 +180,53 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Função para registrar
-    registerForm.addEventListener('submit', function (e) {
+    registerForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         const name = document.getElementById('registerName').value;
         const email = document.getElementById('registerEmail').value;
         const address = document.getElementById('registerAddress').value;
+        const phone = document.getElementById('registerPhone').value;
         const password = document.getElementById('registerPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        if (validateRegisterForm(name, email, address, password, confirmPassword)) {
+        const isValid = await validateRegisterForm(name, email, address, phone, password, confirmPassword);
+        if (isValid) {
             fetch('/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, email, address, password, confirmPassword })
+                body: JSON.stringify({ name, email, address, phone, password, confirmPassword })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Usuário registrado com sucesso!');
-
-                    // Alternar para o formulário de login automaticamente
-                    loginFormContainer.style.display = 'block';
-                    registerFormContainer.style.display = 'none';
-                } else {
-                    if (data.message === 'E-mail já cadastrado.') {
-                        setError('registerEmail', data.message); // Mostrar erro embaixo do campo de e-mail
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const successAlert = document.getElementById('registerSuccessAlert');
+                        successAlert.style.display = 'block';
+    
+                        // Limpar os campos do formulário de registro
+                        registerForm.reset();
+    
+                        // Alternar para o formulário de login automaticamente após alguns segundos
+                        setTimeout(() => {
+                            successAlert.style.display = 'none'; // Esconde o alerta
+                            loginFormContainer.style.display = 'block';
+                            registerFormContainer.style.display = 'none';
+                        }, 3000); // Tempo em milissegundos (3 segundos)
                     } else {
-                        alert(data.message || 'Erro ao registrar');
+                        if (data.message === 'E-mail já cadastrado.') {
+                            setError('registerEmail', data.message);
+                        } else if (data.message === 'Número já cadastrado') {
+                            setError('registerPhone', 'Número já cadastrado');
+                        } else {
+                            setError('registerEmail', 'Erro ao registrar');
+                        }
                     }
-                }
-            })
-            .catch(error => {
-                alert('Erro ao registrar: ' + error.message);
-            });
+                })
+                .catch(error => {
+                    setError('registerEmail', 'Erro ao registrar: ' + error.message);
+                });
         }
     });
 });
+
