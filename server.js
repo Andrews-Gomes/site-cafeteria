@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Configuração do banco de dados MySQL
 const connection = mysql.createConnection({
-    host: 'autorack.proxy.rlwy.net',
+    host: 'mysql.railway.internal',
     user: 'root',
     password: 'jxBrxkWLSlQzdZkjMZqYEXqCxZKCZjmd',
     database: 'railway',
