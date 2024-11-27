@@ -319,9 +319,20 @@ app.put('/user-data', authenticateToken, async (req, res) => {
             emailAtualizado = email;
         }
 
+        // Se nova senha for fornecida, realiza o hash
         if (nova_senha) {
             senhaAtualizada = await bcrypt.hash(nova_senha, 10);
         }
+
+        // Debug: Verifique os valores antes de fazer a atualização
+        console.log({
+            nome_completo,
+            emailAtualizado,
+            endereco,
+            telefoneAtualizado,
+            senhaAtualizada,
+            userId: req.user.id
+        });
 
         const updateQuery = `
             UPDATE usuarios 
@@ -338,6 +349,7 @@ app.put('/user-data', authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Erro ao atualizar perfil" });
     }
 });
+
 
 // Rota para excluir a conta
 app.delete('/delete-account', authenticateToken, (req, res) => {
