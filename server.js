@@ -8,7 +8,7 @@ const { Pool } = require('pg');
 const router = express.Router();
 
 const app = express();
-const port = 3000;
+const port = process.env.DB_PORT || 5432;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,7 +22,7 @@ const pool = new Pool({
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
     password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT || 5432,
+    port: 5432,
     ssl: {
       rejectUnauthorized: false // Permitir conexão SSL
     }
