@@ -213,6 +213,13 @@ app.get('/profile', authenticateToken, (req, res) => {
         }
 
         const user = result.rows[0];
+        console.log('Dados do usuário:', {
+            nome_completo: user.nome_completo,
+            email: user.email,
+            endereco: user.endereco,
+            telefone: user.telefone
+        });
+        
         res.json({
             nome_completo: user.nome_completo,
             email: user.email,
@@ -220,15 +227,6 @@ app.get('/profile', authenticateToken, (req, res) => {
             telefone: user.telefone
         });
     });
-});
-
-console.log({
-    nome_completo,
-    emailAtualizado,
-    endereco,
-    telefoneAtualizado,
-    senhaAtualizada,
-    userId: req.user.id
 });
 
 
