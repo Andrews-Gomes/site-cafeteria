@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-const port = 3000;
+const port = 49286;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,22 +16,20 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuração do banco de dados MySQL
 const connection = mysql.createConnection({
-    host: 'localhost',
+    host: 'autorack.proxy.rlwy.net',
     user: 'root',
-    password: 'Salmo91@123',
-    database: 'cafeteria'
-});
-
-// Conectar ao banco de dados
-connection.connect(err => {
+    password: 'jxBrxkWLSlQzdZkjMZqYEXqCxZKCZjmd',
+    database: 'railway'
+  });
+  
+  connection.connect((err) => {
     if (err) {
-        console.error('Erro ao conectar ao banco de dados:', err);
-        return;
+      console.error('Erro ao conectar ao banco de dados:', err);
+      return;
     }
-    console.log('Conexão com o banco de dados MySQL bem-sucedida!');
-});
+    console.log('Conectado ao banco de dados');
+  });
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
