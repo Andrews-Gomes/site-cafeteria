@@ -8,9 +8,14 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Use a porta definida pelo Railway
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+const port = process.env.PORT || 8080;
+
+app.get('/', (req, res) => {
+    res.send('Site funcionando!');
+  });
+
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
 });
 
 
