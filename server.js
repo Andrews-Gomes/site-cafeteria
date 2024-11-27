@@ -6,7 +6,6 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const router = express.Router();
-const url = require('url');
 
 const app = express();
 const port = 3000;
@@ -17,39 +16,22 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// URL de conexão do JawsDB fornecida pelo Heroku
-const jawsdbUrl = process.env.JAWSDB_URL;
-
-// Parseando a URL de conexão
-const dbUrl = url.parse(jawsdbUrl);
-const [user, password] = dbUrl.auth.split(':');
-
-// Criando a conexão com o MySQL
+// Configuração do banco de dados MySQL
 const connection = mysql.createConnection({
-  host: dbUrl.hostname,
-  user: user,
-  password: password,
-  database: dbUrl.pathname.split('/')[1],
-  port: dbUrl.port || 3306, // Se a porta não for fornecida, use a padrão (3306)
+    host: 'localhost',
+    user: 'root',
+    password: 'Salmo91@123',
+    database: 'cafeteria'
 });
 
 // Conectar ao banco de dados
-connection.connect((err) => {
-  if (err) {
-    console.error('Erro ao conectar ao banco de dados:', err.stack);
-    return;
-  }
-  console.log('Conectado ao banco de dados com ID ' + connection.threadId);
+connection.connect(err => {
+    if (err) {
+        console.error('Erro ao conectar ao banco de dados:', err);
+        return;
+    }
+    console.log('Conexão com o banco de dados MySQL bem-sucedida!');
 });
-
-// Conectar ao banco de dados
-//connection.connect(err => {
-//    if (err) {
-//        console.error('Erro ao conectar ao banco de dados:', err);
-//        return;
-//    }
-//    console.log('Conexão com o banco de dados MySQL bem-sucedida!');
-//});
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
