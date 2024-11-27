@@ -229,7 +229,6 @@ app.put('/user-data', authenticateToken, async (req, res) => {
     // Validações básicas
     const errors = {};
 
-    // Verificar se os campos obrigatórios estão preenchidos corretamente
     if (!nome_completo || nome_completo.length <= 3) {
         errors.nome_completo = "Nome completo deve ter mais de 3 caracteres";
     }
@@ -250,7 +249,6 @@ app.put('/user-data', authenticateToken, async (req, res) => {
         errors.senha_atual = "Senha atual é obrigatória";
     }
 
-    // Verificar se a nova senha e a confirmação são iguais e se são diferentes da senha atual
     if (nova_senha || confirmar_nova_senha) {
         if (nova_senha !== confirmar_nova_senha) {
             errors.confirmar_nova_senha = "As senhas não correspondem";
@@ -263,54 +261,68 @@ app.put('/user-data', authenticateToken, async (req, res) => {
         }
     }
 
-    // Se houver erros, retornar os erros imediatamente
     if (Object.keys(errors).length > 0) return res.status(400).json({ errors });
 
     try {
-        // Consultar o usuário para verificar o telefone e a senha
-        const [userRows] = await connection.promise().query('SELECT telefone, senha, email FROM usuarios WHERE id = ?', [req.user.id]);
-        const user = userRows[0]; // Certifique-se de acessar o primeiro registro corretamente
-        if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+        const client = await pool.connect();
 
-        // Verificar se a senha atual está correta
+        // Consultar o usuário
+        const userQuery = 'SELECT telefone, senha, email FROM usuarios WHERE id = $1';
+        const userResult = await client.query(userQuery, [req.user.id]);
+
+        if (userResult.rows.length === 0) {
+            client.release();
+            return res.status(404).json({ message: "Usuário não encontrado" });
+        }
+
+        const user = userResult.rows[0];
+
         const isMatch = await bcrypt.compare(senha_atual, user.senha);
         if (!isMatch) {
+            client.release();
             return res.status(400).json({ errors: { senha_atual: "Senha atual incorreta" } });
         }
 
-        // Variáveis para salvar os valores atualizados
         let telefoneAtualizado = telefone || user.telefone;
         let emailAtualizado = email || user.email;
-        let senhaAtualizada = user.senha; // Inicializa com a senha atual do banco
+        let senhaAtualizada = user.senha;
 
-        // Verificar se o telefone foi alterado
+        // Verificar telefone
         if (telefone && telefone !== user.telefone) {
-            const [existingPhone] = await connection.promise().query('SELECT id FROM usuarios WHERE telefone = ?', [telefone]);
-            if (existingPhone.length > 0 && existingPhone[0].id !== req.user.id) {
+            const phoneQuery = 'SELECT id FROM usuarios WHERE telefone = $1';
+            const phoneResult = await client.query(phoneQuery, [telefone]);
+
+            if (phoneResult.rows.length > 0 && phoneResult.rows[0].id !== req.user.id) {
+                client.release();
                 return res.status(400).json({ errors: { telefone: "Telefone já cadastrado por outro usuário" } });
             }
             telefoneAtualizado = telefone;
         }
 
-        // Verificar se o email foi alterado
+        // Verificar email
         if (email && email !== user.email) {
-            const [existingEmail] = await connection.promise().query('SELECT id FROM usuarios WHERE email = ?', [email]);
-            if (existingEmail.length > 0 && existingEmail[0].id !== req.user.id) {
+            const emailQuery = 'SELECT id FROM usuarios WHERE email = $1';
+            const emailResult = await client.query(emailQuery, [email]);
+
+            if (emailResult.rows.length > 0 && emailResult.rows[0].id !== req.user.id) {
+                client.release();
                 return res.status(400).json({ errors: { email: "Email já cadastrado por outro usuário" } });
             }
             emailAtualizado = email;
         }
 
-        // Se a nova senha foi fornecida, atualizar a senha
         if (nova_senha) {
             senhaAtualizada = await bcrypt.hash(nova_senha, 10);
         }
 
-        // Atualizar os dados no banco de dados
-        await connection.promise().query(
-            'UPDATE usuarios SET nome_completo = ?, email = ?, endereco = ?, telefone = ?, senha = ? WHERE id = ?',
-            [nome_completo, emailAtualizado, endereco, telefoneAtualizado, senhaAtualizada, req.user.id]
-        );
+        const updateQuery = `
+            UPDATE usuarios 
+            SET nome_completo = $1, email = $2, endereco = $3, telefone = $4, senha = $5
+            WHERE id = $6
+        `;
+        await client.query(updateQuery, [nome_completo, emailAtualizado, endereco, telefoneAtualizado, senhaAtualizada, req.user.id]);
+
+        client.release();
 
         res.json({ message: "Perfil atualizado com sucesso" });
     } catch (err) {
