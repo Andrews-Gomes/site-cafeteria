@@ -24,7 +24,7 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD,
     port: 5432,
     ssl: {
-      rejectUnauthorized: false // Permitir conexão SSL
+        rejectUnauthorized: false // Permitir conexão SSL
     }
 });
 
@@ -219,7 +219,7 @@ app.get('/profile', authenticateToken, (req, res) => {
             endereco: user.endereco,
             telefone: user.telefone
         });
-        
+
         res.json({
             nome_completo: user.nome_completo,
             email: user.email,
@@ -293,7 +293,15 @@ app.put('/user-data', authenticateToken, async (req, res) => {
 
         let telefoneAtualizado = telefone || user.telefone;
         let emailAtualizado = email || user.email;
-        let senhaAtualizada = user.senha;
+        let senhaAtualizada = user.senha;  // Inicia com a senha atual do banco
+
+        // Se nova senha for fornecida, realiza o hash
+        if (nova_senha) {
+            senhaAtualizada = await bcrypt.hash(nova_senha, 10);  // Se nova senha, faz o hash
+        }
+
+        // Debug: Verifique o tipo da senha antes de enviar
+        console.log('Senha Atualizada:', senhaAtualizada, 'Tipo:', typeof senhaAtualizada);
 
         // Verificar telefone
         if (telefone && telefone !== user.telefone) {
@@ -319,26 +327,13 @@ app.put('/user-data', authenticateToken, async (req, res) => {
             emailAtualizado = email;
         }
 
-        // Se nova senha for fornecida, realiza o hash
-        if (nova_senha) {
-            senhaAtualizada = await bcrypt.hash(nova_senha, 10);
-        }
-
-        // Debug: Verifique os valores antes de fazer a atualização
-        console.log({
-            nome_completo,
-            emailAtualizado,
-            endereco,
-            telefoneAtualizado,
-            senhaAtualizada,
-            userId: req.user.id
-        });
-
+        // Consulta de atualização
         const updateQuery = `
             UPDATE usuarios 
             SET nome_completo = $1, email = $2, endereco = $3, telefone = $4, senha = $5
             WHERE id = $6
         `;
+
         await client.query(updateQuery, [nome_completo, emailAtualizado, endereco, telefoneAtualizado, senhaAtualizada, req.user.id]);
 
         client.release();
