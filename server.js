@@ -52,7 +52,7 @@ app.get('/', (req, res) => {
 app.post('/check-email', (req, res) => {
     const { email } = req.body;
 
-    client.query('SELECT * FROM usuarios WHERE email = $1', [email], (err, result) => {
+    pool.query('SELECT * FROM usuarios WHERE email = $1', [email], (err, result) => {
         if (err) {
             console.error('Erro ao verificar e-mail:', err);
             return res.status(500).json({ message: 'Erro ao verificar e-mail.' });
@@ -70,7 +70,7 @@ app.post('/check-email', (req, res) => {
 app.post('/check-phone', (req, res) => {
     const { phone } = req.body;
 
-    client.query('SELECT * FROM usuarios WHERE telefone = $1', [phone], (err, result) => {
+    pool.query('SELECT * FROM usuarios WHERE telefone = $1', [phone], (err, result) => {
         if (err) {
             console.error('Erro ao verificar telefone:', err);
             return res.status(500).json({ message: 'Erro ao verificar telefone.' });
@@ -104,7 +104,7 @@ app.post('/register', (req, res) => {
         return res.status(400).json({ message: 'Telefone inválido. Use o formato (XX) XXXXX-XXXX.' });
     }
 
-    client.query('SELECT * FROM usuarios WHERE telefone = $1', [phone], (err, result) => {
+    pool.query('SELECT * FROM usuarios WHERE telefone = $1', [phone], (err, result) => {
         if (err) {
             console.error('Erro ao verificar telefone:', err);
             return res.status(500).json({ message: 'Erro ao verificar telefone.' });
@@ -114,7 +114,7 @@ app.post('/register', (req, res) => {
             return res.status(400).json({ message: 'Número já cadastrado.' });
         }
 
-        client.query('SELECT * FROM usuarios WHERE email = $1', [email], (err, result) => {
+        pool.query('SELECT * FROM usuarios WHERE email = $1', [email], (err, result) => {
             if (err) {
                 console.error('Erro ao verificar e-mail:', err);
                 return res.status(500).json({ message: 'Erro ao verificar e-mail.' });
@@ -130,7 +130,7 @@ app.post('/register', (req, res) => {
                     return res.status(500).json({ message: 'Erro ao criar senha.' });
                 }
 
-                client.query(
+                pool.query(
                     'INSERT INTO usuarios (nome_completo, email, endereco, senha, telefone) VALUES ($1, $2, $3, $4, $5)',
                     [name, email, address, hashedPassword, phone],
                     (err) => {
@@ -151,7 +151,7 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    client.query('SELECT * FROM usuarios WHERE email = $1', [email], (err, result) => {
+    pool.query('SELECT * FROM usuarios WHERE email = $1', [email], (err, result) => {
         if (err) {
             console.error('Erro ao fazer login:', err);
             return res.status(500).json({ message: 'Erro ao fazer login.' });
@@ -232,7 +232,7 @@ app.get('/user-data', (req, res) => {
 
         const userId = decoded.id;
 
-        client.query('SELECT nome_completo, email, telefone, endereco FROM usuarios WHERE id = $1', [userId], (err, result) => {
+        pool.query('SELECT nome_completo, email, telefone, endereco FROM usuarios WHERE id = $1', [userId], (err, result) => {
             if (err) {
                 console.error('Erro ao buscar dados do usuário:', err);
                 return res.status(500).json({ message: 'Erro ao buscar dados do usuário.' });
@@ -278,7 +278,7 @@ app.post('/edit-profile', (req, res) => {
                     return res.status(500).json({ message: 'Erro ao criar nova senha.' });
                 }
 
-                client.query(
+                pool.query(
                     'UPDATE usuarios SET nome_completo = $1, email = $2, telefone = $3, endereco = $4, senha = $5 WHERE id = $6',
                     [name, email, phone, address, hashedPassword, userId],
                     (err) => {
@@ -292,7 +292,7 @@ app.post('/edit-profile', (req, res) => {
                 );
             });
         } else {
-            client.query(
+            pool.query(
                 'UPDATE usuarios SET nome_completo = $1, email = $2, telefone = $3, endereco = $4 WHERE id = $5',
                 [name, email, phone, address, userId],
                 (err) => {
