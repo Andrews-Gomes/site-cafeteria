@@ -8,16 +8,7 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-const port = process.env.PORT || 8080;
-
-app.get('/', (req, res) => {
-    res.send('Site funcionando!');
-  });
-
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
-});
-
+const port = 3000;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,27 +16,22 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-
-
+// Configuração do banco de dados MySQL
 const connection = mysql.createConnection({
-  host: 'junction.proxy.rlwy.net', // Host do banco de dados
-  user: 'root', // Usuário do banco de dados
-  password: 'gVsEowQYrqEHRGhNaGjHMEBkdGfQbkXA', // Senha do banco
-  database: 'railway', // Nome do banco de dados
-  port: 24233, // Porta do banco
-  connectTimeout: 30000, // Aumentando o tempo de conexão para 30 segundos
+    host: 'localhost',
+    user: 'root',
+    password: 'Salmo91@123',
+    database: 'cafeteria'
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.error('Erro ao conectar ao banco de dados:', err);
-  } else {
-    console.log('Conexão bem-sucedida com o banco de dados!');
-  }
+// Conectar ao banco de dados
+connection.connect(err => {
+    if (err) {
+        console.error('Erro ao conectar ao banco de dados:', err);
+        return;
+    }
+    console.log('Conexão com o banco de dados MySQL bem-sucedida!');
 });
-
-
-  
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
@@ -399,7 +385,7 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
 
 // Iniciar o servidor
-//app.listen(port, () => {
-  //  console.log(`Servidor rodando em http://localhost:${port}`);
-//});
+app.listen(port, () => {
+    console.log(`Servidor rodando em http://localhost:${port}`);
+});
 
