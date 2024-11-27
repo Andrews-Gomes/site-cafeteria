@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-
+const port = 3000;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,14 +16,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-
-// Configuração do banco de dados MySQL com a URL externa do Railway
+// Configuração do banco de dados MySQL
 const connection = mysql.createConnection({
-    host: 'autorack.proxy.rlwy.net',
+    host: 'localhost',
     user: 'root',
-    password: 'jxBrxkWLSlQzdZkjMZqYEXqCxZKCZjmd',
-    database: 'railway',
-    port: 49286
+    password: 'Salmo91@123',
+    database: 'cafeteria'
 });
 
 // Conectar ao banco de dados
@@ -386,4 +384,8 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
 
 
+// Iniciar o servidor
+app.listen(port, () => {
+    console.log(`Servidor rodando em http://localhost:${port}`);
+});
 
