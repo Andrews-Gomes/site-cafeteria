@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-const port = 49286;
+const port = 3306;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
