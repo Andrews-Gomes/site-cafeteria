@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const router = express.Router();
 
 const app = express();
-const port = 3306;
+
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -21,7 +21,8 @@ const connection = mysql.createConnection({
     host: 'autorack.proxy.rlwy.net',
     user: 'root',
     password: 'jxBrxkWLSlQzdZkjMZqYEXqCxZKCZjmd',
-    database: 'railway'
+    database: 'railway',
+    port: 3306
 });
 
 // Conectar ao banco de dados
@@ -384,8 +385,4 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
 
 
-// Iniciar o servidor
-app.listen(port, () => {
-    console.log(`Servidor rodando em site-cafeteria-production.up.railway.app`);
-});
 
