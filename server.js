@@ -17,17 +17,18 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // Configuração da conexão usando as credenciais do Railway
-const connection = mysql.createConnection({
-    host: 'autorack.proxy.rlwy.net',  // Host fornecido pelo Railway
-    user: 'root',  // Usuário de acesso ao banco de dados
-    password: 'jxBrxkWLSlQzdZkjMZqYEXqCxZKCZjmd',  // Senha fornecida
-    database: 'railway',  // Nome do banco de dados
-    port: 49286,  // Porta fornecida
-    timeout: 30000  // Timeout ajustado para 30 segundos
-  });
+const pool = mysql.createPool({
+    host: 'autorack.proxy.rlwy.net',
+    user: 'root',
+    password: 'jxBrxkWLSlQzdZkjMZqYEXqCxZKCZjmd',
+    database: 'railway',
+    port: 49286,
+    connectionLimit: 10,  // Ajuste o número de conexões conforme necessário
+    timeout: 30000
+});
   
   // Conectar ao banco de dados
-  connection.connect((err) => {
+ pool.connect((err) => {
     if (err) {
       console.error('Erro ao conectar ao banco de dados:', err);
     } else {
@@ -385,9 +386,4 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
 
 
-
-// Iniciar o servidor
-app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
-});
 
