@@ -16,22 +16,20 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuração do banco de dados MySQL
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Salmo91@123',
-    database: 'cafeteria'
-});
-
-// Conectar ao banco de dados
-connection.connect(err => {
+    host: process.env.DB_HOST,       // Usando a variável de ambiente para o host
+    user: process.env.DB_USER,       // Usando a variável de ambiente para o usuário
+    password: process.env.DB_PASSWORD, // Usando a variável de ambiente para a senha
+    database: process.env.DB_NAME    // Usando a variável de ambiente para o nome do banco
+  });
+  
+  connection.connect((err) => {
     if (err) {
-        console.error('Erro ao conectar ao banco de dados:', err);
-        return;
+      console.error('Erro ao conectar no banco de dados: ' + err.stack);
+      return;
     }
-    console.log('Conexão com o banco de dados MySQL bem-sucedida!');
-});
+    console.log('Conectado ao banco de dados com ID ' + connection.threadId);
+  });
 
 // Servir arquivos estáticos das pastas 'paginas' e 'scripts'
 app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
