@@ -20,7 +20,7 @@ function getTokenFromCookie() {
     const token = getTokenFromCookie();
     if (token) {
       try {
-        const response = await fetch('/api/usuario', {
+        const response = await fetch('/profile', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
