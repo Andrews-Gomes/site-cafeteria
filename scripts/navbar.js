@@ -6,10 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // Função para verificar se o usuário está autenticado
     function checkAuth() {
-        fetch('/auth-check', {
-            method: 'GET',
-            credentials: 'include' // Incluir cookies (token) na requisição
-        })
+        fetch('/auth-check')
             .then(response => response.json())
             .then(data => {
                 if (data.authenticated) {
@@ -26,24 +23,21 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => console.log('Erro ao verificar autenticação:', error));
     }
+
     // Verificar autenticação ao carregar a página
     checkAuth();
 
     // Adicionar funcionalidade de logout
-logoutLink.addEventListener('click', function (e) {
-    e.preventDefault();
-    fetch('/logout', {
-        method: 'POST', // Geralmente, o logout é feito via POST para evitar cache em GET
-        credentials: 'include' // Incluir cookies (token) na requisição
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Redirecionar para a página inicial após logout
-            window.location.href = '/';
-        }
-    })
-    .catch(error => console.log('Erro ao realizar logout:', error));
-});
-
+    logoutLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        fetch('/logout')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Redirecionar para a página inicial após logout
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => console.log('Erro ao realizar logout:', error));
+    });
 });

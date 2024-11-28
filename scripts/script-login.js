@@ -79,13 +79,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             } else if (data.message === 'Senha incorreta.') {
                                 setError('loginPassword', 'Senha incorreta');
                             } else {
-                                setError('loginEmail', data.message || 'Erro inesperado');
+                                alert(data.message || 'Erro inesperado');
                             }
                         });
                     }
                 })
                 .catch(error => {
-                    setError('loginEmail', 'Erro ao fazer login: ' + error.message);
+                    alert('Erro ao fazer login: ' + error.message);
                 });
         }
     });
@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const phoneField = document.getElementById('registerPhone');
     phoneField.addEventListener('input', applyPhoneMask);
 
-    // Função de validação de registro (assíncrona)
-    async function validateRegisterForm(name, email, address, phone, password, confirmPassword) {
+    // Função de validação de registro
+    function validateRegisterForm(name, email, address, phone, password, confirmPassword) {
         let valid = true;
         clearError('registerName');
         clearError('registerEmail');
@@ -140,32 +140,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Verificar se o número de telefone já está cadastrado
-        const phoneCheckResponse = await fetch('/check-phone', {
+        fetch('/check-phone', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ phone }),
+            body: JSON.stringify({ phone })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                setError('registerPhone', 'Número já cadastrado');
+                valid = false;
+            }
         });
-        const phoneData = await phoneCheckResponse.json();
-        if (phoneData.exists) {
-            setError('registerPhone', 'Número já cadastrado');
-            valid = false;
-        }
-
-        // Verificar se o e-mail já está cadastrado
-        const emailCheckResponse = await fetch('/check-email', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email }),
-        });
-        const emailData = await emailCheckResponse.json();
-        if (emailData.exists) {
-            setError('registerEmail', 'E-mail já cadastrado');
-            valid = false;
-        }
 
         if (password.length < 8) {
             setError('registerPassword', 'A senha deve ter mais de 8 caracteres');
@@ -180,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Função para registrar
-    registerForm.addEventListener('submit', async function (e) {
+    registerForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const name = document.getElementById('registerName').value;
         const email = document.getElementById('registerEmail').value;
@@ -189,8 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const password = document.getElementById('registerPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        const isValid = await validateRegisterForm(name, email, address, phone, password, confirmPassword);
-        if (isValid) {
+        if (validateRegisterForm(name, email, address, phone, password, confirmPassword)) {
             fetch('/register', {
                 method: 'POST',
                 headers: {
@@ -201,32 +188,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const successAlert = document.getElementById('registerSuccessAlert');
-                        successAlert.style.display = 'block';
-    
+                        alert('Usuário registrado com sucesso!');
+
                         // Limpar os campos do formulário de registro
-                        registerForm.reset();
-    
-                        // Alternar para o formulário de login automaticamente após alguns segundos
-                        setTimeout(() => {
-                            successAlert.style.display = 'none'; // Esconde o alerta
-                            loginFormContainer.style.display = 'block';
-                            registerFormContainer.style.display = 'none';
-                        }, 3000); // Tempo em milissegundos (3 segundos)
+                        registerForm.reset();  // Aqui está a correção: reset no formulário
+
+                        // Alternar para o formulário de login automaticamente
+                        loginFormContainer.style.display = 'block';
+                        registerFormContainer.style.display = 'none';
                     } else {
                         if (data.message === 'E-mail já cadastrado.') {
-                            setError('registerEmail', data.message);
+                            setError('registerEmail', data.message); // Mostrar erro embaixo do campo de e-mail
                         } else if (data.message === 'Número já cadastrado') {
                             setError('registerPhone', 'Número já cadastrado');
                         } else {
-                            setError('registerEmail', 'Erro ao registrar');
+                            alert(data.message || 'Erro ao registrar');
                         }
                     }
                 })
                 .catch(error => {
-                    setError('registerEmail', 'Erro ao registrar: ' + error.message);
+                    alert('Erro ao registrar: ' + error.message);
                 });
         }
     });
 });
-
