@@ -8,7 +8,7 @@ const { Pool } = require('pg');
 const router = express.Router();
 
 const app = express();
-
+const port = process.env.DB_PORT || 5432;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
