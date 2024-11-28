@@ -279,14 +279,18 @@ app.put('/user-data', async (req, res) => {
             values.push(senhaHash);
         }
 
+        // Adicionar ID do usuário para a condição WHERE
+        values.push(userId);
+        const query = `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${index}`;
+
+        // Debug: Verificar a consulta e os valores
+        console.log('Query gerada:', query);
+        console.log('Valores fornecidos:', values);
+
         // Validar se há algo para atualizar
         if (updates.length === 0) {
             return res.status(400).json({ errors: { geral: 'Nenhuma alteração foi fornecida.' } });
         }
-
-        // Adicionar ID do usuário para a condição WHERE
-        const query = `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${index}`;
-        values.push(userId);
 
         // Executar a consulta
         await pool.query(query, values);
@@ -297,6 +301,7 @@ app.put('/user-data', async (req, res) => {
         res.status(500).json({ errors: { geral: 'Erro interno do servidor.' } });
     }
 });
+
 
 
 
