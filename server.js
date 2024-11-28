@@ -8,7 +8,7 @@ const { Pool } = require('pg');
 const router = express.Router();
 
 const app = express();
-const port = process.env.DB_PORT || 5432;
+const PORT = process.env.DB_PORT || 5432;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -230,10 +230,106 @@ app.get('/profile', authenticateToken, (req, res) => {
 });
 
 
+app.put('/user-data', authenticateToken, async (req, res) => {
+    //console.log('Dados recebidos no backend:', req.body);  // Log dos dados recebidos
+    const { nome_completo, email, endereco, telefone, senha_atual, nova_senha, confirmar_nova_senha } = req.body;
 
+    // Validações básicas
+    const errors = {};
 
+    // Verificar se os campos obrigatórios estão preenchidos corretamente
+    if (!nome_completo || nome_completo.length <= 3) {
+        errors.nome_completo = "Nome completo deve ter mais de 3 caracteres";
+    }
 
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        errors.email = "Email inválido";
+    }
 
+    if (!endereco || endereco.length <= 5 || !/\d/.test(endereco)) {
+        errors.endereco = "Endereço deve ter mais de 5 caracteres e conter um número";
+    }
+
+    if (!telefone || !/^\(\d{2}\) \d{5}-\d{4}$/.test(telefone)) {
+        errors.telefone = "Telefone inválido. Use o formato (XX) XXXXX-XXXX";
+    }
+
+    if (!senha_atual) {
+        errors.senha_atual = "Senha atual é obrigatória";
+    }
+
+    // Verificar se a nova senha e a confirmação são iguais e se são diferentes da senha atual
+    if (nova_senha || confirmar_nova_senha) {
+        if (nova_senha !== confirmar_nova_senha) {
+            errors.confirmar_nova_senha = "As senhas não correspondem";
+        }
+        if (nova_senha && nova_senha.length < 8) {
+            errors.nova_senha = "A nova senha deve ter pelo menos 8 caracteres";
+        }
+        if (nova_senha === senha_atual) {
+            errors.nova_senha = "A nova senha não pode ser igual à senha atual";
+        }
+    }
+
+    // Se houver erros, retornar os erros imediatamente
+    if (Object.keys(errors).length > 0) return res.status(400).json({ errors });
+
+    try {
+        // Consultar o usuário para verificar o telefone e a senha
+        const { rows: userRows } = await pool.query('SELECT telefone, senha, email FROM usuarios WHERE id = $1', [req.user.id]);
+        const user = userRows[0]; // Certifique-se de acessar o primeiro registro corretamente
+        if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+
+        // Verificar se a senha atual está correta
+        if (!senha_atual || senha_atual === "") {
+            return res.status(400).json({ errors: { senha_atual: "Senha atual não fornecida" } });
+        }
+
+        const isMatch = await bcrypt.compare(senha_atual, user.senha);
+        if (!isMatch) {
+            return res.status(400).json({ errors: { senha_atual: "Senha atual incorreta" } });
+        }
+
+        // Variáveis para salvar os valores atualizados
+        let telefoneAtualizado = telefone || user.telefone;
+        let emailAtualizado = email || user.email;
+        let senhaAtualizada = user.senha; // Inicializa com a senha atual do banco
+
+        // Verificar se o telefone foi alterado
+        if (telefone && telefone !== user.telefone) {
+            const { rows: existingPhone } = await pool.query('SELECT id FROM usuarios WHERE telefone = $1', [telefone]);
+            if (existingPhone.length > 0 && existingPhone[0].id !== req.user.id) {
+                return res.status(400).json({ errors: { telefone: "Telefone já cadastrado por outro usuário" } });
+            }
+            telefoneAtualizado = telefone;
+        }
+
+        // Verificar se o email foi alterado
+        if (email && email !== user.email) {
+            const { rows: existingEmail } = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
+            if (existingEmail.length > 0 && existingEmail[0].id !== req.user.id) {
+                return res.status(400).json({ errors: { email: "Email já cadastrado por outro usuário" } });
+            }
+            emailAtualizado = email;
+        }
+
+        // Se a nova senha foi fornecida, atualizar a senha
+        if (nova_senha) {
+            senhaAtualizada = await bcrypt.hash(nova_senha, 10);
+        }
+
+        // Atualizar os dados no banco de dados
+        await pool.query(
+            'UPDATE usuarios SET nome_completo = $1, email = $2, endereco = $3, telefone = $4, senha = $5 WHERE id = $6',
+            [nome_completo, emailAtualizado, endereco, telefoneAtualizado, senhaAtualizada, req.user.id]
+        );
+
+        res.json({ message: "Perfil atualizado com sucesso" });
+    } catch (err) {
+        console.error('Erro ao atualizar perfil:', err);
+        res.status(500).json({ message: "Erro ao atualizar perfil" });
+    }
+});
 
 
 // Rota para excluir a conta
@@ -252,3 +348,6 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
     });
 });
 
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
