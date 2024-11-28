@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else if (data.message === 'Número já cadastrado') {
                             setError('registerPhone', 'Número já cadastrado');
                         } else {
-                            alert(data.message || 'Erro ao registrar');
+                            //alert(data.message || 'Erro ao registrar');
                         }
                     }
                 })
