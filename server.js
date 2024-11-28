@@ -298,8 +298,8 @@ app.put('/user-data', authenticateToken, async (req, res) => {
 
     try {
         // Consultar o usuário para verificar o telefone e a senha
-        const [userRows] = await connection.promise().query('SELECT telefone, senha, email FROM usuarios WHERE id = ?', [req.user.id]);
-        const user = userRows[0]; // Certifique-se de acessar o primeiro registro corretamente
+        const result = await pool.query('SELECT telefone, senha, email FROM usuarios WHERE id = $1', [req.user.id]);
+        const user = result.rows[0]; // Certifique-se de acessar o primeiro registro corretamente
         if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
 
         // Verificar se a senha atual está correta
@@ -319,8 +319,8 @@ app.put('/user-data', authenticateToken, async (req, res) => {
 
         // Verificar se o telefone foi alterado
         if (telefone && telefone !== user.telefone) {
-            const [existingPhone] = await connection.promise().query('SELECT id FROM usuarios WHERE telefone = ?', [telefone]);
-            if (existingPhone.length > 0 && existingPhone[0].id !== req.user.id) {
+            const phoneCheck = await pool.query('SELECT id FROM usuarios WHERE telefone = $1', [telefone]);
+            if (phoneCheck.rows.length > 0 && phoneCheck.rows[0].id !== req.user.id) {
                 return res.status(400).json({ errors: { telefone: "Telefone já cadastrado por outro usuário" } });
             }
             telefoneAtualizado = telefone;
@@ -328,8 +328,8 @@ app.put('/user-data', authenticateToken, async (req, res) => {
 
         // Verificar se o email foi alterado
         if (email && email !== user.email) {
-            const [existingEmail] = await connection.promise().query('SELECT id FROM usuarios WHERE email = ?', [email]);
-            if (existingEmail.length > 0 && existingEmail[0].id !== req.user.id) {
+            const emailCheck = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
+            if (emailCheck.rows.length > 0 && emailCheck.rows[0].id !== req.user.id) {
                 return res.status(400).json({ errors: { email: "Email já cadastrado por outro usuário" } });
             }
             emailAtualizado = email;
@@ -341,8 +341,8 @@ app.put('/user-data', authenticateToken, async (req, res) => {
         }
 
         // Atualizar os dados no banco de dados
-        await connection.promise().query(
-            'UPDATE usuarios SET nome_completo = ?, email = ?, endereco = ?, telefone = ?, senha = ? WHERE id = ?',
+        await pool.query(
+            'UPDATE usuarios SET nome_completo = $1, email = $2, endereco = $3, telefone = $4, senha = $5 WHERE id = $6',
             [nome_completo, emailAtualizado, endereco, telefoneAtualizado, senhaAtualizada, req.user.id]
         );
 
