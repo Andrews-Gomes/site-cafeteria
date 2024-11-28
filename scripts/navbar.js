@@ -6,7 +6,10 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // Função para verificar se o usuário está autenticado
     function checkAuth() {
-        fetch('/auth-check')
+        fetch('/auth-check', {
+            method: 'GET',
+            credentials: 'include' // Incluir cookies (token) na requisição
+        })
             .then(response => response.json())
             .then(data => {
                 if (data.authenticated) {
@@ -23,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => console.log('Erro ao verificar autenticação:', error));
     }
-
     // Verificar autenticação ao carregar a página
     checkAuth();
 

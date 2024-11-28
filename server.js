@@ -198,6 +198,12 @@ function authenticateToken(req, res, next) {
     });
 }
 
+// Rota para verificar a autenticação
+app.get('/auth-check', authenticateToken, (req, res) => {
+    // Se o token for válido, o middleware authenticateToken permitirá chegar até aqui
+    res.json({ authenticated: true });
+});
+
 // Rota para obter dados do perfil
 app.get('/profile', authenticateToken, (req, res) => {
     const userId = req.user.userId;
