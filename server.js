@@ -371,7 +371,14 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
             return res.status(404).send('Usuário não encontrado');
         }
 
-        // Se o usuário foi deletado, envia sucesso
+        // Exclui o cookie de autenticação
+        res.clearCookie('auth_token', {
+            httpOnly: true,
+            secure: false, // Se estiver em produção, ajuste para true (HTTPS necessário)
+            sameSite: 'Strict',
+        });
+
+        // Se o usuário foi deletado e o cookie foi removido, envia sucesso
         res.status(200).send('Conta excluída com sucesso');
     });
 });
