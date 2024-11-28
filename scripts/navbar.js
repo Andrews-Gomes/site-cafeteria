@@ -30,16 +30,20 @@ document.addEventListener('DOMContentLoaded', function () {
     checkAuth();
 
     // Adicionar funcionalidade de logout
-    logoutLink.addEventListener('click', function (e) {
-        e.preventDefault();
-        fetch('/logout')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Redirecionar para a página inicial após logout
-                    window.location.href = '/';
-                }
-            })
-            .catch(error => console.log('Erro ao realizar logout:', error));
-    });
+logoutLink.addEventListener('click', function (e) {
+    e.preventDefault();
+    fetch('/logout', {
+        method: 'POST', // Geralmente, o logout é feito via POST para evitar cache em GET
+        credentials: 'include' // Incluir cookies (token) na requisição
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirecionar para a página inicial após logout
+            window.location.href = '/';
+        }
+    })
+    .catch(error => console.log('Erro ao realizar logout:', error));
+});
+
 });

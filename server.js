@@ -180,6 +180,16 @@ app.post('/login', (req, res) => {
     });
 });
 
+// Rota para logout
+app.post('/logout', (req, res) => {
+    // Verifique se há um token de autenticação no cookie
+    res.clearCookie('auth_token'); // Aqui você limpa o cookie com o token (ajuste o nome conforme necessário)
+    
+    // Responde com sucesso
+    res.json({ success: true });
+});
+
+
 // Middleware de autenticação
 function authenticateToken(req, res, next) {
     const token = req.cookies.token;
