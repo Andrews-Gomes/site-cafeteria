@@ -59,7 +59,7 @@ document.getElementById('perfil-form').addEventListener('submit', (event) => {
                 setTimeout(() => {
                     successAlert.style.display = 'none';
                     window.location.reload();  // Recarregar a página após mostrar a mensagem de sucesso
-                }, 3000);
+                }, 2000);
             }
         })
         .catch(err => console.error('Erro ao atualizar perfil:', err));
@@ -149,45 +149,56 @@ function getCookie(name) {
 }
 
 
-// Lógica para excluir conta
+// Lógica para abrir o modal de confirmação
 document.getElementById('deleteAccountBtn').addEventListener('click', function () {
-    if (confirm("Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.")) {
-        fetch('/delete-account', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + getCookie('auth_token') // Envia o token de autenticação
+    // Exibe o modal
+    const deleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    deleteModal.show();
+});
+
+// Lógica para excluir a conta quando confirmar no modal
+document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+    // Fecha o modal
+    const deleteModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+    deleteModal.hide();
+
+    // Realiza a requisição de exclusão
+    fetch('/delete-account', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getCookie('auth_token') // Envia o token de autenticação
+        }
+    })
+        .then(response => {
+            if (response.ok) {
+                // Chama a rota de logout para garantir que o cookie seja removido
+                fetch('/logout', {
+                    method: 'GET',
+                    credentials: 'same-origin' // Para garantir que os cookies da mesma origem sejam enviados
+                })
+                    .then(logoutResponse => {
+                        if (logoutResponse.ok) {
+                            // Redireciona para a página inicial após o logout
+                            window.location.href = '/index.html';
+                        } else {
+                            alert('Erro ao realizar logout. Tente novamente mais tarde.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro na requisição de logout:', error);
+                        alert('Erro na requisição de logout. Tente novamente mais tarde.');
+                    });
+            } else {
+                alert('Erro ao excluir a conta. Tente novamente mais tarde.');
             }
         })
-            .then(response => {
-                if (response.ok) {
-                    // Chama a rota de logout para garantir que o cookie seja removido
-                    fetch('/logout', {
-                        method: 'GET',
-                        credentials: 'same-origin' // Para garantir que os cookies da mesma origem sejam enviados
-                    })
-                        .then(logoutResponse => {
-                            if (logoutResponse.ok) {
-                                // Redireciona para a página inicial após o logout
-                                window.location.href = '/index.html';
-                            } else {
-                                alert('Erro ao realizar logout. Tente novamente mais tarde.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erro na requisição de logout:', error);
-                            alert('Erro na requisição de logout. Tente novamente mais tarde.');
-                        });
-                } else {
-                    alert('Erro ao excluir a conta. Tente novamente mais tarde.');
-                }
-            })
-            .catch(error => {
-                console.error('Erro na requisição de exclusão de conta:', error);
-                alert('Erro na requisição. Tente novamente mais tarde.');
-            });
-    }
+        .catch(error => {
+            console.error('Erro na requisição de exclusão de conta:', error);
+            alert('Erro na requisição. Tente novamente mais tarde.');
+        });
 });
+
 
 // Função para obter o valor do cookie
 function getCookie(name) {
