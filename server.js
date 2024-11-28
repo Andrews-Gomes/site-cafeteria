@@ -232,27 +232,29 @@ app.get('/profile', authenticateToken, (req, res) => {
 
 app.put('/user-data', async (req, res) => {
     const { nome_completo, email, endereco, telefone, senha_atual, nova_senha } = req.body;
-    const userId = req.userId; // Supondo que você usa middleware para definir `req.userId`.
+    const userId = req.userId; // Supondo que req.userId vem do middleware de autenticação.
 
     try {
-        // Verificar se a senha atual foi fornecida
-        if (!senha_atual) {
-            return res.status(400).json({ errors: { senha_atual: 'Senha atual é obrigatória.' } });
+        // Se for enviada uma senha nova, a senha atual é obrigatória
+        if (nova_senha && !senha_atual) {
+            return res.status(400).json({ errors: { senha_atual: 'Senha atual é obrigatória para alterar a senha.' } });
         }
 
-        // Buscar a senha do usuário no banco
-        const userResult = await pool.query('SELECT senha FROM usuarios WHERE id = $1', [userId]);
-        if (userResult.rows.length === 0) {
-            return res.status(404).json({ errors: { geral: 'Usuário não encontrado.' } });
+        // Validar senha atual somente se foi fornecida
+        if (senha_atual && senha_atual.trim() !== '') {
+            const userResult = await pool.query('SELECT senha FROM usuarios WHERE id = $1', [userId]);
+
+            if (userResult.rows.length === 0) {
+                return res.status(404).json({ errors: { geral: 'Usuário não encontrado.' } });
+            }
+
+            const senhaCorreta = await bcrypt.compare(senha_atual, userResult.rows[0].senha);
+            if (!senhaCorreta) {
+                return res.status(401).json({ errors: { senha_atual: 'Senha atual incorreta.' } });
+            }
         }
 
-        // Verificar se a senha atual está correta
-        const senhaCorreta = await bcrypt.compare(senha_atual, userResult.rows[0].senha);
-        if (!senhaCorreta) {
-            return res.status(401).json({ errors: { senha_atual: 'Senha atual incorreta.' } });
-        }
-
-        // Preparar atualização
+        // Preparar consulta para atualizar os dados
         const updates = [];
         const values = [];
         let index = 1;
@@ -279,20 +281,16 @@ app.put('/user-data', async (req, res) => {
             values.push(senhaHash);
         }
 
-        // Adicionar ID do usuário para a condição WHERE
+        // Adicionar ID do usuário no final para o WHERE
         values.push(userId);
         const query = `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${index}`;
-
-        // Debug: Verificar a consulta e os valores
-        console.log('Query gerada:', query);
-        console.log('Valores fornecidos:', values);
 
         // Validar se há algo para atualizar
         if (updates.length === 0) {
             return res.status(400).json({ errors: { geral: 'Nenhuma alteração foi fornecida.' } });
         }
 
-        // Executar a consulta
+        // Executar a atualização
         await pool.query(query, values);
 
         res.json({ message: 'Dados atualizados com sucesso!' });
