@@ -51,8 +51,15 @@ document.getElementById('perfil-form').addEventListener('submit', (event) => {
                     inputField.classList.add('is-invalid');
                 });
             } else {
-                alert('Dados atualizados com sucesso!');
-                window.location.reload();
+                // Exibir a mensagem de sucesso
+                const successAlert = document.getElementById('successAlert');
+                successAlert.style.display = 'block';  // Mostrar a div de sucesso
+
+                // Ocultar a mensagem de sucesso após 3 segundos
+                setTimeout(() => {
+                    successAlert.style.display = 'none';
+                    window.location.reload();  // Recarregar a página após mostrar a mensagem de sucesso
+                }, 3000);
             }
         })
         .catch(err => console.error('Erro ao atualizar perfil:', err));
@@ -127,7 +134,7 @@ document.getElementById('cancelEditBtn').addEventListener('click', () => {
     // Alterar visibilidade dos botões
     document.getElementById('editDataBtn').style.display = 'block';
     document.getElementById('cancelEditBtn').style.display = 'none';
-    
+
     // Desabilitar o botão "Salvar Alterações" ao cancelar
     document.getElementById('saveChangesBtn').disabled = true;
 
