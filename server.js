@@ -230,75 +230,7 @@ app.get('/profile', authenticateToken, (req, res) => {
 });
 
 
-app.put('/user-data', async (req, res) => {
-    const { nome_completo, email, endereco, telefone, senha_atual, nova_senha } = req.body;
-    const userId = req.userId; // Supondo que req.userId vem do middleware de autenticação.
 
-    try {
-        // Se for enviada uma senha nova, a senha atual é obrigatória
-        if (nova_senha && !senha_atual) {
-            return res.status(400).json({ errors: { senha_atual: 'Senha atual é obrigatória para alterar a senha.' } });
-        }
-
-        // Validar senha atual somente se foi fornecida
-        if (senha_atual && senha_atual.trim() !== '') {
-            const userResult = await pool.query('SELECT senha FROM usuarios WHERE id = $1', [userId]);
-
-            if (userResult.rows.length === 0) {
-                return res.status(404).json({ errors: { geral: 'Usuário não encontrado.' } });
-            }
-
-            const senhaCorreta = await bcrypt.compare(senha_atual, userResult.rows[0].senha);
-            if (!senhaCorreta) {
-                return res.status(401).json({ errors: { senha_atual: 'Senha atual incorreta.' } });
-            }
-        }
-
-        // Preparar consulta para atualizar os dados
-        const updates = [];
-        const values = [];
-        let index = 1;
-
-        if (nome_completo) {
-            updates.push(`nome_completo = $${index++}`);
-            values.push(nome_completo);
-        }
-        if (email) {
-            updates.push(`email = $${index++}`);
-            values.push(email);
-        }
-        if (endereco) {
-            updates.push(`endereco = $${index++}`);
-            values.push(endereco);
-        }
-        if (telefone) {
-            updates.push(`telefone = $${index++}`);
-            values.push(telefone);
-        }
-        if (nova_senha) {
-            const senhaHash = await bcrypt.hash(nova_senha, 10);
-            updates.push(`senha = $${index++}`);
-            values.push(senhaHash);
-        }
-
-        // Adicionar ID do usuário no final para o WHERE
-        values.push(userId);
-        const query = `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${index}`;
-
-        // Validar se há algo para atualizar
-        if (updates.length === 0) {
-            return res.status(400).json({ errors: { geral: 'Nenhuma alteração foi fornecida.' } });
-        }
-
-        // Executar a atualização
-        await pool.query(query, values);
-
-        res.json({ message: 'Dados atualizados com sucesso!' });
-    } catch (error) {
-        console.error('Erro ao atualizar perfil:', error);
-        res.status(500).json({ errors: { geral: 'Erro interno do servidor.' } });
-    }
-});
 
 
 
