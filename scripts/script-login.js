@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         registerFormContainer.style.display = 'none';
                     } else {
                         if (data.message === 'E-mail já cadastrado.') {
-                            setError('registerEmail', data.message); // Mostrar erro embaixo do campo de e-mail
+                            setError('registerEmail', 'E-mail já cadastrado'); // Mostrar erro embaixo do campo de e-mail
                         } else if (data.message === 'Número já cadastrado') {
                             setError('registerPhone', 'Número já cadastrado');
                         } else {
