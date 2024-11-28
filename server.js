@@ -230,118 +230,64 @@ app.get('/profile', authenticateToken, (req, res) => {
 });
 
 
-// Rota para atualizar dados do perfil
-app.put('/user-data', authenticateToken, async (req, res) => {
-    const { nome_completo, email, endereco, telefone, senha_atual, nova_senha, confirmar_nova_senha } = req.body;
-
-    // Validações básicas
-    const errors = {};
-
-    if (!nome_completo || nome_completo.length <= 3) {
-        errors.nome_completo = "Nome completo deve ter mais de 3 caracteres";
-    }
-
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-        errors.email = "Email inválido";
-    }
-
-    if (!endereco || endereco.length <= 5 || !/\d/.test(endereco)) {
-        errors.endereco = "Endereço deve ter mais de 5 caracteres e conter um número";
-    }
-
-    if (!telefone || !/^\(\d{2}\) \d{5}-\d{4}$/.test(telefone)) {
-        errors.telefone = "Telefone inválido. Use o formato (XX) XXXXX-XXXX";
-    }
-
-    if (!senha_atual) {
-        errors.senha_atual = "Senha atual é obrigatória";
-    }
-
-    if (nova_senha || confirmar_nova_senha) {
-        if (nova_senha !== confirmar_nova_senha) {
-            errors.confirmar_nova_senha = "As senhas não correspondem";
-        }
-        if (nova_senha && nova_senha.length < 8) {
-            errors.nova_senha = "A nova senha deve ter pelo menos 8 caracteres";
-        }
-        if (nova_senha === senha_atual) {
-            errors.nova_senha = "A nova senha não pode ser igual à senha atual";
-        }
-    }
-
-    if (Object.keys(errors).length > 0) return res.status(400).json({ errors });
+app.put('/user-data', async (req, res) => {
+    const { nome_completo, email, endereco, telefone, senha_atual, nova_senha } = req.body;
+    const userId = req.userId; // Supondo que o middleware de autenticação forneça o ID do usuário logado.
 
     try {
-        const client = await pool.connect();
+        // Verificar se a senha atual foi fornecida
+        if (!senha_atual) {
+            return res.status(400).json({ errors: { senha_atual: 'Senha atual é obrigatória.' } });
+        }
 
-        // Consultar o usuário
-        const userQuery = 'SELECT telefone, senha, email FROM usuarios WHERE id = $1';
-        const userResult = await client.query(userQuery, [req.user.id]);
-
+        // Buscar os dados do usuário no banco de dados
+        const userResult = await pool.query('SELECT senha FROM usuarios WHERE id = $1', [userId]);
         if (userResult.rows.length === 0) {
-            client.release();
-            return res.status(404).json({ message: "Usuário não encontrado" });
+            return res.status(404).json({ errors: { geral: 'Usuário não encontrado.' } });
         }
 
-        const user = userResult.rows[0];
-
-        const isMatch = await bcrypt.compare(senha_atual, user.senha);
-        if (!isMatch) {
-            client.release();
-            return res.status(400).json({ errors: { senha_atual: "Senha atual incorreta" } });
+        const senhaCorreta = await bcrypt.compare(senha_atual, userResult.rows[0].senha);
+        if (!senhaCorreta) {
+            return res.status(401).json({ errors: { senha_atual: 'Senha atual incorreta.' } });
         }
 
-        let telefoneAtualizado = telefone || user.telefone;
-        let emailAtualizado = email || user.email;
-        let senhaAtualizada = user.senha;  // Inicia com a senha atual do banco
+        // Atualizar os campos no banco de dados
+        const updates = [];
+        const values = [];
+        let index = 1;
 
-        // Se nova senha for fornecida, realiza o hash
+        if (nome_completo) {
+            updates.push(`nome_completo = $${index++}`);
+            values.push(nome_completo);
+        }
+        if (email) {
+            updates.push(`email = $${index++}`);
+            values.push(email);
+        }
+        if (endereco) {
+            updates.push(`endereco = $${index++}`);
+            values.push(endereco);
+        }
+        if (telefone) {
+            updates.push(`telefone = $${index++}`);
+            values.push(telefone);
+        }
         if (nova_senha) {
-            senhaAtualizada = await bcrypt.hash(nova_senha, 10);  // Se nova senha, faz o hash
+            const senhaHash = await bcrypt.hash(nova_senha, 10);
+            updates.push(`senha = $${index++}`);
+            values.push(senhaHash);
         }
 
-        // Debug: Verifique o tipo da senha antes de enviar
-        console.log('Senha Atualizada:', senhaAtualizada, 'Tipo:', typeof senhaAtualizada);
-
-        // Verificar telefone
-        if (telefone && telefone !== user.telefone) {
-            const phoneQuery = 'SELECT id FROM usuarios WHERE telefone = $1';
-            const phoneResult = await client.query(phoneQuery, [telefone]);
-
-            if (phoneResult.rows.length > 0 && phoneResult.rows[0].id !== req.user.id) {
-                client.release();
-                return res.status(400).json({ errors: { telefone: "Telefone já cadastrado por outro usuário" } });
-            }
-            telefoneAtualizado = telefone;
+        if (updates.length > 0) {
+            const query = `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${index}`;
+            values.push(userId);
+            await pool.query(query, values);
         }
 
-        // Verificar email
-        if (email && email !== user.email) {
-            const emailQuery = 'SELECT id FROM usuarios WHERE email = $1';
-            const emailResult = await client.query(emailQuery, [email]);
-
-            if (emailResult.rows.length > 0 && emailResult.rows[0].id !== req.user.id) {
-                client.release();
-                return res.status(400).json({ errors: { email: "Email já cadastrado por outro usuário" } });
-            }
-            emailAtualizado = email;
-        }
-
-        // Consulta de atualização
-        const updateQuery = `
-            UPDATE usuarios 
-            SET nome_completo = $1, email = $2, endereco = $3, telefone = $4, senha = $5
-            WHERE id = $6
-        `;
-
-        await client.query(updateQuery, [nome_completo, emailAtualizado, endereco, telefoneAtualizado, senhaAtualizada, req.user.id]);
-
-        client.release();
-
-        res.json({ message: "Perfil atualizado com sucesso" });
-    } catch (err) {
-        console.error('Erro ao atualizar perfil:', err);
-        res.status(500).json({ message: "Erro ao atualizar perfil" });
+        res.json({ message: 'Dados atualizados com sucesso!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ errors: { geral: 'Erro interno do servidor.' } });
     }
 });
 
