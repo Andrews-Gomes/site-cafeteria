@@ -147,13 +147,13 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: JSON.stringify({ phone })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.exists) {
-                setError('registerPhone', 'Número já cadastrado');
-                valid = false;
-            }
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    setError('registerPhone', 'Número já cadastrado');
+                    valid = false;
+                }
+            });
 
         if (password.length < 8) {
             setError('registerPassword', 'A senha deve ter mais de 8 caracteres');
@@ -188,14 +188,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Usuário registrado com sucesso!');
+                        const successAlert = document.getElementById('registerSuccessAlert');
+                        successAlert.style.display = 'block'; // Exibe a mensagem de sucesso
+                        registerForm.reset();  // Reseta o formulário de registro
 
-                        // Limpar os campos do formulário de registro
-                        registerForm.reset();  // Aqui está a correção: reset no formulário
+                        // Esconder a mensagem de sucesso após 3 segundos e então alternar os formulários
+                        setTimeout(() => {
+                            successAlert.style.display = 'none'; // Esconde a mensagem de sucesso
 
-                        // Alternar para o formulário de login automaticamente
-                        loginFormContainer.style.display = 'block';
-                        registerFormContainer.style.display = 'none';
+                            // Alternar para o formulário de login
+                            loginFormContainer.style.display = 'block';
+                            registerFormContainer.style.display = 'none';
+                        }, 3000); // A mensagem desaparecerá após 3 segundos
+
                     } else {
                         if (data.message === 'E-mail já cadastrado.') {
                             setError('registerEmail', data.message); // Mostrar erro embaixo do campo de e-mail
