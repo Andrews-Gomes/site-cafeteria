@@ -359,11 +359,16 @@ app.put('/user-data', authenticateToken, async (req, res) => {
 app.delete('/delete-account', authenticateToken, (req, res) => {
     const userId = req.user.id; // Obtém o ID do usuário a partir do token decodificado
 
-    // Deleta o usuário do banco de dados
-    connection.query('DELETE FROM usuarios WHERE id = ?', [userId], (err, results) => {
+    // Deleta o usuário do banco de dados PostgreSQL
+    pool.query('DELETE FROM usuarios WHERE id = $1', [userId], (err, result) => {
         if (err) {
             console.error('Erro ao excluir usuário:', err);
             return res.status(500).send('Erro ao excluir usuário');
+        }
+
+        // Verifica se alguma linha foi afetada (usuário deletado)
+        if (result.rowCount === 0) {
+            return res.status(404).send('Usuário não encontrado');
         }
 
         // Se o usuário foi deletado, envia sucesso
