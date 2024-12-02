@@ -174,7 +174,7 @@
                 <small class="text-muted">Quantidade: ${item.quantity}</small>
             </div>
             <span class="text-muted">R$ ${(item.price * item.quantity).toFixed(2)}</span>
-            
+            <button class="btn btn-danger btn-sm" onclick="removeItem(${index})">Remover</button>
         `;
                 cartContainer.appendChild(listItem);
                 total += item.price * item.quantity;
